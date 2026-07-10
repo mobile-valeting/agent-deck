@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1019">
+<title>Agent Deck</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='88'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg:        #eef1f6;
+    --bg-grad:   radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #eef1f6 55%);
+    --surface:   #ffffff;
+    --surface-2: #f3f5f9;
+    --surface-3: #e9edf3;
+    --border:    #dde3ec;
+    --border-2:  #cfd6e2;
+    --ink:       #12192a;
+    --ink-2:     #47536a;
+    --ink-mut:   #8a94a6;
+    --accent:    #0a95a8;
+    --accent-2:  #0d7d99;
+    --accent-sft:rgba(10,149,168,.12);
+    --good:      #0a9d63;
+    --good-sft:  rgba(10,157,99,.13);
+    --warn:      #c47908;
+    --danger:    #d8443a;
+    --danger-sft:rgba(216,68,58,.12);
+    --graph:     #0a95a8;
+    --graph-a:   rgba(10,149,168,.28);
+    --graph-b:   rgba(10,149,168,.02);
+    --screen:    #0c1119;
+    --shadow:    0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.08);
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Cascadia Code", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #0b1019;
+      --bg-grad:   radial-gradient(130% 90% at 50% -20%, #16202f 0%, #0b1019 58%);
+      --surface:   #141c29;
+      --surface-2: #1a2432;
+      --surface-3: #212d3d;
+      --border:    #26313f;
+      --border-2:  #303d4e;
+      --ink:       #e8eef6;
+      --ink-2:     #9dabbe;
+      --ink-mut:   #647186;
+      --accent:    #2cc7dc;
+      --accent-2:  #56d6e8;
+      --accent-sft:rgba(44,199,220,.14);
+      --good:      #34d399;
+      --good-sft:  rgba(52,211,153,.14);
+      --warn:      #fbbf24;
+      --danger:    #fb7185;
+      --danger-sft:rgba(251,113,133,.13);
+      --graph:     #2cc7dc;
+      --graph-a:   rgba(44,199,220,.30);
+      --graph-b:   rgba(44,199,220,.02);
+      --screen:    #05080d;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#eef1f6; --bg-grad:radial-gradient(120% 80% at 50% -10%, #fff 0%, #eef1f6 55%);
+    --surface:#fff; --surface-2:#f3f5f9; --surface-3:#e9edf3; --border:#dde3ec; --border-2:#cfd6e2;
+    --ink:#12192a; --ink-2:#47536a; --ink-mut:#8a94a6;
+    --accent:#0a95a8; --accent-2:#0d7d99; --accent-sft:rgba(10,149,168,.12);
+    --good:#0a9d63; --good-sft:rgba(10,157,99,.13); --warn:#c47908; --danger:#d8443a; --danger-sft:rgba(216,68,58,.12);
+    --graph:#0a95a8; --graph-a:rgba(10,149,168,.28); --graph-b:rgba(10,149,168,.02);
+    --screen:#0c1119; --shadow:0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.08);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0b1019; --bg-grad:radial-gradient(130% 90% at 50% -20%, #16202f 0%, #0b1019 58%);
+    --surface:#141c29; --surface-2:#1a2432; --surface-3:#212d3d; --border:#26313f; --border-2:#303d4e;
+    --ink:#e8eef6; --ink-2:#9dabbe; --ink-mut:#647186;
+    --accent:#2cc7dc; --accent-2:#56d6e8; --accent-sft:rgba(44,199,220,.14);
+    --good:#34d399; --good-sft:rgba(52,211,153,.14); --warn:#fbbf24; --danger:#fb7185; --danger-sft:rgba(251,113,133,.13);
+    --graph:#2cc7dc; --graph-a:rgba(44,199,220,.30); --graph-b:rgba(44,199,220,.02);
+    --screen:#05080d; --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); background-image: var(--bg-grad); background-attachment: fixed;
+    color: var(--ink); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    min-height: 100vh;
+  }
+  svg { display: block; }
+  .wrap {
+    max-width: 460px; margin: 0 auto;
+    padding: max(16px, env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .tabnum { font-variant-numeric: tabular-nums; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 0; }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .mk {
+    width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+    background: var(--accent-sft); color: var(--accent); border: 1px solid var(--border);
+  }
+  .brand h1 { font-size: 15px; margin: 0; letter-spacing: .2px; font-weight: 650; }
+  .brand span { display: block; font-size: 10.5px; color: var(--ink-mut); font-family: var(--mono); letter-spacing: .3px; margin-top: 1px; }
+  .statepill {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: .6px;
+    padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--ink-mut); display: flex; align-items: center; gap: 6px;
+  }
+  .statepill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-mut); }
+  .statepill.live { color: var(--good); border-color: var(--good-sft); background: var(--good-sft); }
+  .statepill.live .dot { background: var(--good); animation: ping 1.6s ease-out infinite; }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.5);} 70%{ box-shadow: 0 0 0 6px rgba(52,211,153,0);} 100%{box-shadow:0 0 0 0 rgba(52,211,153,0);} }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+
+  .core { padding: 22px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; overflow: hidden; }
+  .core .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--ink-mut); text-transform: uppercase; }
+  .powerbtn {
+    -webkit-tap-highlight-color: transparent;
+    position: relative; width: 168px; height: 168px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--surface-2); margin: 10px 0 6px; display: grid; place-items: center;
+    box-shadow: inset 0 0 0 1px var(--border), inset 0 4px 18px rgba(0,0,0,.12);
+    transition: transform .12s ease;
+  }
+  .powerbtn:active { transform: scale(.97); }
+  .powerbtn::before {
+    content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--good), transparent 25%, var(--good) 55%, transparent 78%, var(--good));
+    opacity: 0; transition: opacity .3s ease; z-index: 0;
+  }
+  .powerbtn .ring {
+    position: absolute; inset: 10px; border-radius: 50%; background: var(--surface);
+    display: grid; place-items: center; z-index: 1; box-shadow: inset 0 0 0 1px var(--border);
+    transition: box-shadow .3s ease, background .3s ease;
+  }
+  .powerbtn .glyph { width: 46px; height: 46px; color: var(--ink-mut); transition: color .3s ease; z-index: 2; }
+  .powerbtn .core-state { position: absolute; bottom: 34px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; color: var(--ink-mut); z-index: 2; }
+  .core.on .powerbtn::before { opacity: .9; animation: spin 3.5s linear infinite; }
+  .core.on .powerbtn .ring { box-shadow: inset 0 0 0 1px var(--good), 0 0 26px var(--good-sft); }
+  .core.on .powerbtn .glyph { color: var(--good); }
+  .core.on .powerbtn .core-state { color: var(--good); }
+  .core.on .lbl.top { color: var(--good); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d { animation: none; } }
+  .core .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
+  .core .sub b { color: var(--ink); }
+
+  .graph-head { display: flex; align-items: baseline; justify-content: space-between; padding: 15px 16px 4px; }
+  .graph-head .t { font-size: 12px; color: var(--ink-mut); font-family: var(--mono); letter-spacing: .5px; text-transform: uppercase; }
+  .graph-head .big { font-size: 24px; font-weight: 680; letter-spacing: -.5px; }
+  .graph-head .rate { font-family: var(--mono); font-size: 11.5px; color: var(--good); }
+  .graph-head .rate.idle { color: var(--ink-mut); }
+  .gwrap { padding: 4px 10px 12px; position: relative; }
+  svg.graph { width: 100%; height: 96px; overflow: visible; }
+  .gtip { position: absolute; transform: translate(-50%,-120%); background: var(--screen); color: #e8eef6; font-family: var(--mono);
+    font-size: 10.5px; padding: 4px 7px; border-radius: 6px; pointer-events: none; opacity: 0; transition: opacity .1s; white-space: nowrap; border: 1px solid rgba(255,255,255,.1); }
+
+  .sec { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px; }
+  .sec h2 { font-size: 12.5px; margin: 0; color: var(--ink-mut); font-family: var(--mono); letter-spacing: .8px; text-transform: uppercase; font-weight: 600; }
+  .addbtn { font-family: var(--mono); font-size: 11.5px; color: var(--accent); background: var(--accent-sft); border: 1px solid var(--border);
+    padding: 5px 11px; border-radius: 999px; cursor: pointer; font-weight: 600; }
+  .addbtn:active { transform: scale(.96); }
+
+  .agrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .agent { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 8px; position: relative; box-shadow: var(--shadow);
+    transition: transform .1s ease, border-color .2s ease; }
+  .agent:active { transform: scale(.98); }
+  .agent.off { opacity: .55; }
+  .agent .top2 { display: flex; align-items: center; gap: 10px; }
+  .agent .face { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 11px; background: var(--screen); display: grid; place-items: center; overflow: hidden; }
+  .agent .face svg { width: 40px; height: 40px; }
+  .agent .nm { font-size: 13.5px; font-weight: 640; line-height: 1.1; }
+  .agent .role { font-size: 10.5px; color: var(--ink-mut); font-family: var(--mono); margin-top: 3px; line-height: 1.25;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .agent .st { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: .4px; color: var(--ink-mut); text-transform: uppercase; }
+  .agent .st .d { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-mut); }
+  .agent.act .st { color: var(--good); }
+  .agent.act .st .d { background: var(--good); animation: ping 1.6s ease-out infinite; }
+  .agent.idle .st { color: var(--warn); }
+  .agent.idle .st .d { background: var(--warn); }
+  .agent .pin { position: absolute; top: 9px; right: 9px; color: var(--accent); width: 14px; height: 14px; }
+  .agent.add { align-items: center; justify-content: center; border-style: dashed; color: var(--accent); min-height: 104px; gap: 5px; }
+  .agent.add .plus { font-size: 24px; line-height: 1; }
+  .agent.add .txt { font-family: var(--mono); font-size: 11px; }
+
+  .log { background: var(--screen); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .log .lh { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .log .lh .d { width: 8px; height: 8px; border-radius: 50%; }
+  .log .lh .d.r { background: #fb7185; } .log .lh .d.y { background: #fbbf24; } .log .lh .d.g { background: #34d399; }
+  .log .lh .ttl { font-family: var(--mono); font-size: 11px; color: #8a94a6; margin-left: 4px; letter-spacing: .5px; }
+  .log .body { padding: 10px 12px; max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; font-family: var(--mono); font-size: 11px; line-height: 1.35; }
+  .log .body::-webkit-scrollbar { width: 5px; } .log .body::-webkit-scrollbar-thumb { background: #2a3648; border-radius: 3px; }
+  .logrow { display: flex; gap: 8px; animation: slideIn .25s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-4px);} to { opacity: 1; transform: none; } }
+  .logrow .tm { color: #4d5a6e; flex: 0 0 auto; }
+  .logrow .ok { color: #34d399; flex: 0 0 auto; }
+  .logrow .ag { color: #56d6e8; }
+  .logrow .msg { color: #b7c2d0; }
+  .logrow .tk { color: #647186; margin-left: auto; flex: 0 0 auto; }
+  .log .empty { color: #4d5a6e; font-family: var(--mono); font-size: 11px; padding: 6px 2px; text-align: center; }
+
+  .scrim { position: fixed; inset: 0; background: rgba(6,10,16,.55); backdrop-filter: blur(3px); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+  .scrim.show { display: flex; }
+  .sheet { width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px 20px 0 0;
+    padding: 8px 18px calc(24px + env(safe-area-inset-bottom)); animation: up .22s ease; max-height: 88vh; overflow-y: auto; }
+  @keyframes up { from { transform: translateY(30px); opacity: .4; } to { transform: none; opacity: 1; } }
+  .grab { width: 38px; height: 4px; border-radius: 3px; background: var(--border-2); margin: 6px auto 14px; }
+  .sheet h3 { margin: 0 0 3px; font-size: 18px; }
+  .sheet .field { margin-top: 14px; }
+  .sheet label { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-mut); margin-bottom: 6px; }
+  .sheet input, .sheet textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px;
+    color: var(--ink); font-family: var(--sans); font-size: 16px; resize: none; }
+  .sheet input:focus, .sheet textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  .sheet textarea { min-height: 78px; line-height: 1.4; }
+  .detail-head { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+  .detail-head .bigface { width: 62px; height: 62px; border-radius: 15px; background: var(--screen); display: grid; place-items: center; flex:0 0 auto; }
+  .detail-head .bigface svg { width: 52px; height: 52px; }
+  .detail-head .role2 { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-top: 4px; line-height: 1.35; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 16px; }
+  .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat .v { font-size: 17px; font-weight: 650; }
+  .stat .k { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+  .btnrow { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .btn { flex: 1 1 auto; padding: 12px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--ink); font-family: var(--sans); font-size: 13.5px; font-weight: 600; cursor: pointer; min-width: 46%; }
+  .btn:active { transform: scale(.98); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #04222a; }
+  .btn.good { background: var(--good-sft); border-color: var(--good-sft); color: var(--good); }
+  .btn.danger { background: var(--danger-sft); border-color: var(--danger-sft); color: var(--danger); }
+  .btn.wide { min-width: 100%; }
+  .hint { font-size: 11.5px; color: var(--ink-mut); text-align: center; margin-top: 10px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mk">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4" fill="currentColor"/><path d="M9 14h.01M15 14h.01"/></svg>
+      </div>
+      <div><h1>Agent Deck</h1><span>mission control</span></div>
+    </div>
+    <div class="statepill" id="statepill"><span class="dot"></span><span id="statetxt">STANDBY</span></div>
+  </div>
+
+  <div class="card core" id="core">
+    <div class="lbl top" id="corelbl">system standby</div>
+    <button class="powerbtn" id="powerbtn" aria-label="Toggle agents">
+      <span class="ring">
+        <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.5 7a8 8 0 1 0 11 0"/></svg>
+      </span>
+      <span class="core-state" id="corestate">TAP TO START</span>
+    </button>
+    <div class="sub" id="coresub"><b>0</b> of <b>0</b> agents active</div>
+  </div>
+
+  <div class="card">
+    <div class="graph-head">
+      <div><div class="t">Tokens used</div><div class="big tabnum" id="tok">0</div></div>
+      <div class="rate idle tabnum" id="rate">— idle</div>
+    </div>
+    <div class="gwrap">
+      <svg class="graph" id="graph" viewBox="0 0 300 96" preserveAspectRatio="none">
+        <defs><linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--graph-a)"/><stop offset="100%" stop-color="var(--graph-b)"/>
+        </linearGradient></defs>
+        <g id="grid" stroke="var(--border)" stroke-width="1" opacity=".55"></g>
+        <path id="area" fill="url(#gfill)" d=""/>
+        <path id="line" fill="none" stroke="var(--graph)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d=""/>
+        <circle id="endpt" r="3.5" fill="var(--graph)" stroke="var(--surface)" stroke-width="2" cx="0" cy="0"/>
+      </svg>
+      <div class="gtip" id="gtip"></div>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Agents</h2><button class="addbtn" id="addtop">+ New agent</button></div>
+  <div class="agrid" id="agrid"></div>
+
+  <div class="log">
+    <div class="lh"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="ttl">activity log</span></div>
+    <div class="body" id="logbody"><div class="empty" id="logempty">Waiting for start — completed tasks appear here.</div></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+
+<script>
+(function(){
+  "use strict";
+  var TG = window.Telegram && window.Telegram.WebApp;
+  if (TG) {
+    try { TG.ready(); TG.expand(); } catch(e){}
+    var applyTG = function(){ document.documentElement.setAttribute("data-theme", TG.colorScheme === "dark" ? "dark" : "light"); };
+    applyTG();
+    try { TG.onEvent("themeChanged", applyTG); } catch(e){}
+    try { TG.setHeaderColor("secondary_bg_color"); } catch(e){}
+    try { TG.disableVerticalSwipes && TG.disableVerticalSwipes(); } catch(e){}
+  }
+  function haptic(kind){ if (TG && TG.HapticFeedback){ try{ TG.HapticFeedback.impactOccurred(kind||"light"); }catch(e){} } }
+
+  var $ = function(s){ return document.querySelector(s); };
+  var STORE = "agentdeck.v1";
+  var COLORS = [
+    {b:"#22d3ee", g:"#c7f4fb"}, {b:"#a78bfa", g:"#e7defd"}, {b:"#34d399", g:"#cdf6e6"},
+    {b:"#fbbf24", g:"#fdeec4"}, {b:"#f472b6", g:"#fcd9ec"}, {b:"#60a5fa", g:"#d6e6fe"},
+    {b:"#fb7185", g:"#fdd4da"}, {b:"#2dd4bf", g:"#c6f3ec"}
+  ];
+  function hash(s){ var h=0,i; for(i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))|0; } return Math.abs(h); }
+
+  function robot(seed){
+    var h = hash(seed), c = COLORS[h % COLORS.length], body=c.b, glow=c.g;
+    var eye = h % 3, mouth = (h>>2) % 3, ant = (h>>4) % 3;
+    var s = '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">';
+    if (ant===0) s += '<line x1="32" y1="16" x2="32" y2="8" stroke="'+body+'" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="6" r="3" fill="'+glow+'"/>';
+    else if (ant===1) s += '<line x1="24" y1="17" x2="22" y2="9" stroke="'+body+'" stroke-width="2.2" stroke-linecap="round"/><circle cx="22" cy="7.5" r="2.4" fill="'+glow+'"/><line x1="40" y1="17" x2="42" y2="9" stroke="'+body+'" stroke-width="2.2" stroke-linecap="round"/><circle cx="42" cy="7.5" r="2.4" fill="'+glow+'"/>';
+    else s += '<rect x="30" y="6" width="4" height="7" rx="2" fill="'+body+'"/>';
+    s += '<rect x="5" y="30" width="5" height="12" rx="2.5" fill="'+body+'"/><rect x="54" y="30" width="5" height="12" rx="2.5" fill="'+body+'"/>';
+    s += '<rect x="10" y="16" width="44" height="40" rx="12" fill="'+body+'"/>';
+    s += '<rect x="15" y="23" width="34" height="26" rx="9" fill="#0c1119"/>';
+    if (eye===0) s += '<circle cx="25" cy="33" r="3.6" fill="'+glow+'"/><circle cx="39" cy="33" r="3.6" fill="'+glow+'"/>';
+    else if (eye===1) s += '<rect x="22" y="29.5" width="6" height="8" rx="2" fill="'+glow+'"/><rect x="36" y="29.5" width="6" height="8" rx="2" fill="'+glow+'"/>';
+    else s += '<path d="M21 35 Q25 29 29 35" stroke="'+glow+'" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M35 35 Q39 29 43 35" stroke="'+glow+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    if (mouth===0) s += '<rect x="25" y="42.5" width="14" height="3" rx="1.5" fill="'+glow+'"/>';
+    else if (mouth===1) s += '<rect x="25" y="41.5" width="4" height="4" rx="1" fill="'+glow+'"/><rect x="30" y="41.5" width="4" height="4" rx="1" fill="'+glow+'"/><rect x="35" y="41.5" width="4" height="4" rx="1" fill="'+glow+'"/>';
+    else s += '<path d="M25 42 Q32 48 39 42" stroke="'+glow+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    return s + '</svg>';
+  }
+
+  var DEFAULTS = [
+    { id:"scout",  name:"Scout",  use:"Scan FB Marketplace for underpriced iPhones around Bognor", enabled:true, pinned:true,
+      pool:["scanned 34 new listings","flagged iPhone 13 @ £180 (est +£95)","filtered 7 out-of-area posts","matched 2 to comps DB"] },
+    { id:"ledger", name:"Ledger", use:"Track token spend and running costs across every agent", enabled:true, pinned:false,
+      pool:["reconciled daily spend","cost/agent report built","budget check: 62% of cap","logged 1,204 tokens to sheet"] },
+    { id:"forge",  name:"Forge",  use:"Draft and post resale listings once a deal is confirmed", enabled:false, pinned:false,
+      pool:["drafted listing copy","generated 3 photo captions","queued eBay cross-post","priced item at £275"] },
+    { id:"sentry", name:"Sentry", use:"Watch confirmed listings for price drops and alert me", enabled:true, pinned:false,
+      pool:["price drop: -£20 on watch #4","sent Telegram alert","re-checked 12 watched items","no changes in last sweep"] }
+  ];
+
+  var state = load();
+  function load(){
+    try { var s = JSON.parse(localStorage.getItem(STORE)); if (s && s.agents) return s; } catch(e){}
+    return { power:false, tokens:0, agents: DEFAULTS.map(function(a){ return Object.assign({tokens:0,tasks:0}, a); }) };
+  }
+  function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e){} }
+
+  function sorted(){
+    return state.agents.slice().sort(function(a,b){
+      if (a.pinned!==b.pinned) return a.pinned?-1:1;
+      if (a.enabled!==b.enabled) return a.enabled?-1:1;
+      return 0;
+    });
+  }
+  function activeAgents(){ return state.power ? state.agents.filter(function(a){return a.enabled;}) : []; }
+
+  function renderAgents(){
+    var grid = $("#agrid"); grid.innerHTML = "";
+    sorted().forEach(function(a){
+      var el = document.createElement("div");
+      var active = state.power && a.enabled;
+      el.className = "agent" + (a.enabled? "":" off") + (active? " act":"") + (a.enabled&&!state.power? " idle":"");
+      var stTxt = active ? "active" : (a.enabled ? "ready" : "disabled");
+      el.innerHTML =
+        (a.pinned? '<svg class="pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>':"") +
+        '<div class="top2"><div class="face">'+robot(a.id)+'</div><div><div class="nm">'+esc(a.name)+'</div><div class="role">'+esc(a.use)+'</div></div></div>' +
+        '<div class="st"><span class="d"></span>'+stTxt+'</div>';
+      el.addEventListener("click", function(){ haptic("light"); openDetail(a.id); });
+      grid.appendChild(el);
+    });
+    var add = document.createElement("div");
+    add.className = "agent add";
+    add.innerHTML = '<div class="plus">+</div><div class="txt">Add agent</div>';
+    add.addEventListener("click", function(){ haptic("light"); openAdd(); });
+    grid.appendChild(add);
+  }
+
+  function renderCore(){
+    var core = $("#core"), pill = $("#statepill");
+    var act = activeAgents().length, total = state.agents.length;
+    if (state.power){
+      core.classList.add("on");
+      $("#corelbl").textContent = "system running";
+      $("#corestate").textContent = "TAP TO STOP";
+      pill.className = "statepill live"; $("#statetxt").textContent = "RUNNING";
+    } else {
+      core.classList.remove("on");
+      $("#corelbl").textContent = "system standby";
+      $("#corestate").textContent = "TAP TO START";
+      pill.className = "statepill"; $("#statetxt").textContent = "STANDBY";
+    }
+    $("#coresub").innerHTML = "<b>"+act+"</b> of <b>"+total+"</b> agents active";
+  }
+
+  var series = [];
+  (function seed(){ var base = state.tokens||0; for (var i=0;i<40;i++){ series.push(Math.round(base*(0.82 + 0.18*(i/39)))); } })();
+  function renderGraph(){
+    var W=300,H=96,pad=6, max=Math.max.apply(null,series), min=0, span=(max-min)||1, n=series.length;
+    var xat=function(i){ return pad + (W-2*pad)*(i/(n-1)); };
+    var yat=function(v){ return H-pad - (H-2*pad)*((v-min)/span); };
+    var d=""; series.forEach(function(v,i){ d += (i?"L":"M")+xat(i).toFixed(1)+" "+yat(v).toFixed(1)+" "; });
+    var ad = d + "L"+xat(n-1).toFixed(1)+" "+(H-pad)+" L"+xat(0).toFixed(1)+" "+(H-pad)+" Z";
+    $("#line").setAttribute("d", d); $("#area").setAttribute("d", ad);
+    var ep=$("#endpt"); ep.setAttribute("cx", xat(n-1)); ep.setAttribute("cy", yat(series[n-1]));
+    var gh=""; for (var k=1;k<4;k++){ gh+='<line x1="0" y1="'+(H/4*k).toFixed(0)+'" x2="'+W+'" y2="'+(H/4*k).toFixed(0)+'"/>'; }
+    $("#grid").innerHTML = gh;
+  }
+  (function(){
+    var svg=$("#graph"), tip=$("#gtip");
+    svg.addEventListener("pointermove", function(e){
+      var r=svg.getBoundingClientRect(), frac=(e.clientX-r.left)/r.width;
+      var i=Math.max(0,Math.min(series.length-1, Math.round(frac*(series.length-1))));
+      tip.style.opacity="1"; tip.style.left=(frac*r.width)+"px"; tip.style.top="6px";
+      tip.textContent = fmt(Math.round(series[i]))+" tok";
+    });
+    svg.addEventListener("pointerleave", function(){ tip.style.opacity="0"; });
+  })();
+
+  function renderTokens(){
+    $("#tok").textContent = fmt(state.tokens);
+    var r=$("#rate");
+    if (state.power){ r.className="rate tabnum"; r.textContent="▲ live"; }
+    else { r.className="rate idle tabnum"; r.textContent="— idle"; }
+  }
+
+  function pushLog(agent, msg, tk){
+    var body=$("#logbody"), em=$("#logempty"); if (em) em.remove();
+    var row=document.createElement("div"); row.className="logrow";
+    var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
+    row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">✓</span><span class="ag">'+esc(agent)+'</span><span class="msg">'+esc(msg)+'</span><span class="tk">+'+tk+'</span>';
+    body.insertBefore(row, body.firstChild);
+    while (body.children.length>40) body.removeChild(body.lastChild);
+  }
+
+  var timer=null;
+  function tick(){
+    var act=activeAgents(); if (!act.length) return;
+    var a=act[Math.floor(Math.random()*act.length)];
+    var msg = a.pool ? a.pool[Math.floor(Math.random()*a.pool.length)] : deriveTask(a.use);
+    var tk = 180 + Math.floor(Math.random()*1400);
+    state.tokens += tk; a.tokens=(a.tokens||0)+tk; a.tasks=(a.tasks||0)+1;
+    series.push(state.tokens); if (series.length>40) series.shift();
+    pushLog(a.name, msg, tk); renderTokens(); renderGraph(); save();
+  }
+  function deriveTask(use){
+    var verbs=["processed","completed","checked","updated","synced","reviewed"];
+    return verbs[Math.floor(Math.random()*verbs.length)]+" — "+String(use).toLowerCase().split(" ").slice(0,6).join(" ");
+  }
+  function startLoop(){ if (!timer) timer=setInterval(tick, 1500); }
+  function stopLoop(){ clearInterval(timer); timer=null; }
+
+  $("#powerbtn").addEventListener("click", function(){
+    state.power=!state.power; save(); haptic("medium");
+    renderCore(); renderAgents(); renderTokens();
+    if (state.power) startLoop(); else stopLoop();
+  });
+
+  var scrim=$("#scrim"), sheet=$("#sheet");
+  function closeSheet(){ scrim.classList.remove("show"); }
+  scrim.addEventListener("click", function(e){ if (e.target===scrim) closeSheet(); });
+
+  function openAdd(){
+    sheet.innerHTML =
+      '<div class="grab"></div><h3>New agent</h3>' +
+      '<div class="field"><label>Name</label><input id="na" placeholder="e.g. Analyst" maxlength="18"/></div>' +
+      '<div class="field"><label>What should it do?</label><textarea id="nu" placeholder="Describe its use case — this is what the agent works on"></textarea></div>' +
+      '<div class="btnrow"><button class="btn wide primary" id="savea">Save agent</button></div>' +
+      '<div class="hint">Saved agents persist on this device.</div>';
+    scrim.classList.add("show"); setTimeout(function(){ var n=$("#na"); if(n) n.focus(); },80);
+    $("#savea").addEventListener("click", function(){
+      var nm=$("#na").value.trim(), us=$("#nu").value.trim();
+      if (!nm){ $("#na").focus(); return; }
+      state.agents.push({ id:"a"+Date.now(), name:nm, use:us||"General assistant", enabled:true, pinned:false, tokens:0, tasks:0 });
+      save(); haptic("medium"); renderAgents(); renderCore(); closeSheet();
+    });
+  }
+
+  function openDetail(id){
+    var a=state.agents.filter(function(x){return x.id===id;})[0]; if (!a) return;
+    var active = state.power && a.enabled;
+    sheet.innerHTML =
+      '<div class="grab"></div>' +
+      '<div class="detail-head"><div class="bigface">'+robot(a.id)+'</div>' +
+        '<div><h3>'+esc(a.name)+'</h3><div class="role2">'+esc(a.use)+'</div></div></div>' +
+      '<div class="stats">' +
+        '<div class="stat"><div class="v tabnum">'+fmt(a.tokens||0)+'</div><div class="k">tokens</div></div>' +
+        '<div class="stat"><div class="v tabnum">'+(a.tasks||0)+'</div><div class="k">tasks</div></div>' +
+        '<div class="stat"><div class="v" style="color:'+(active?"var(--good)":a.enabled?"var(--warn)":"var(--ink-mut)")+'">'+(active?"Active":a.enabled?"Ready":"Off")+'</div><div class="k">status</div></div>' +
+      '</div>' +
+      '<div class="btnrow">' +
+        '<button class="btn '+(a.enabled?"":"good")+'" id="ben">'+(a.enabled?"Disable":"Activate")+'</button>' +
+        '<button class="btn" id="bpin">'+(a.pinned?"Unpin":"Pin to top")+'</button>' +
+      '</div>' +
+      '<div class="btnrow"><button class="btn danger wide" id="bdel">Delete agent</button></div>';
+    scrim.classList.add("show");
+    $("#ben").addEventListener("click", function(){ a.enabled=!a.enabled; save(); haptic("light"); renderAgents(); renderCore(); openDetail(id); });
+    $("#bpin").addEventListener("click", function(){ a.pinned=!a.pinned; save(); haptic("light"); renderAgents(); openDetail(id); });
+    $("#bdel").addEventListener("click", function(){
+      state.agents=state.agents.filter(function(x){return x.id!==id;});
+      save(); haptic("medium"); renderAgents(); renderCore(); closeSheet();
+    });
+  }
+  $("#addtop").addEventListener("click", function(){ haptic("light"); openAdd(); });
+
+  function fmt(n){ return (n||0).toLocaleString("en-US"); }
+  function pad2(n){ return n<10?"0"+n:""+n; }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  renderAgents(); renderCore(); renderTokens(); renderGraph();
+  if (state.power) startLoop();
+})();
+</script>
+</body>
+</html>
