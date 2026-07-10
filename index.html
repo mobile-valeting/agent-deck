@@ -145,7 +145,7 @@
   .core.on .powerbtn .core-state { color: var(--good); }
   .core.on .lbl.top { color: var(--good); }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse { animation: none; } }
   .core .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
   .core .sub b { color: var(--ink); }
 
@@ -187,6 +187,49 @@
   .agent.add { align-items: center; justify-content: center; border-style: dashed; color: var(--accent); min-height: 104px; gap: 5px; }
   .agent.add .plus { font-size: 24px; line-height: 1; }
   .agent.add .txt { font-family: var(--mono); font-size: 11px; }
+
+  /* model tier badge */
+  .mdl { font-family: var(--mono); font-size: 8.5px; font-weight: 700; letter-spacing: .5px; padding: 2px 5px; border-radius: 5px; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; }
+  .mdl.haiku  { color: var(--ink-mut); background: var(--surface-3); }
+  .mdl.sonnet { color: var(--accent); background: var(--accent-sft); }
+  .mdl.opus   { color: var(--warn); background: rgba(251,191,36,.14); border-color: rgba(251,191,36,.24); }
+  .agent .foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+
+  /* management (Overseer) card — senior treatment */
+  .mgr { overflow: hidden; border-color: var(--border-2); }
+  .mgr .strip { height: 3px; background: var(--warn); }
+  .mgr .in { padding: 15px 16px; display: flex; flex-direction: column; gap: 13px; }
+  .mgr .row1 { display: flex; align-items: flex-start; gap: 13px; }
+  .mgr .ovface { position: relative; width: 54px; height: 54px; border-radius: 14px; background: var(--screen); display: grid; place-items: center; flex: 0 0 auto; box-shadow: 0 0 0 1px rgba(251,191,36,.4), 0 0 18px rgba(251,191,36,.13); }
+  .mgr .ovface > span:first-child { display: grid; place-items: center; }
+  .mgr .ovface > span:first-child svg { width: 46px; height: 46px; }
+  .mgr .ovface .badge { position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; border-radius: 50%; background: var(--warn); color: #2a1c00; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+  .mgr .ovface .badge svg { width: 12px; height: 12px; }
+  .mgr .mid { flex: 1; min-width: 0; }
+  .mgr .nm { font-size: 15px; font-weight: 680; display: flex; align-items: center; gap: 8px; letter-spacing: -.2px; }
+  .mgr .desc { font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); line-height: 1.4; margin-top: 4px; }
+  .mgr .sys { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-family: var(--mono); font-size: 9.5px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 3px 7px 3px 6px; display: flex; align-items: center; gap: 5px; }
+  .chip .d { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-mut); transition: background .35s ease; }
+  .mgr.active .chip .d { background: var(--good); }
+  .mgr .mstats { display: flex; gap: 18px; font-family: var(--mono); font-size: 10px; color: var(--ink-mut); text-transform: uppercase; letter-spacing: .4px; }
+  .mgr .mstats b { display: block; color: var(--ink); font-size: 15px; letter-spacing: 0; }
+  .mgr .ovstate { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mut); display: flex; align-items: center; gap: 7px; }
+  .mgr.active .ovstate { color: var(--warn); }
+  .mgr .ovstate .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-mut); flex: 0 0 auto; }
+  .mgr.active .ovstate .pulse { background: var(--warn); animation: ping 1.8s ease-out infinite; }
+
+  /* toggle switch */
+  .switch { width: 46px; height: 27px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--border); position: relative; cursor: pointer; flex: 0 0 auto; transition: background .2s ease, border-color .2s ease; -webkit-tap-highlight-color: transparent; }
+  .switch .knob { position: absolute; top: 2px; left: 2px; width: 21px; height: 21px; border-radius: 50%; background: var(--ink-mut); transition: transform .22s cubic-bezier(.4,0,.2,1), background .2s ease; }
+  .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .switch.on { background: var(--good-sft); border-color: var(--good-sft); }
+  .switch.on .knob { transform: translateX(19px); background: var(--good); }
+
+  /* manager log rows read as gold */
+  .logrow.mgr .ok { color: var(--warn); }
+  .logrow.mgr .ag { color: #fbbf24; }
+  .seclabel { font-family: var(--mono); font-size: 10px; color: var(--ink-mut); letter-spacing: .5px; }
 
   .log { background: var(--screen); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
   .log .lh { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
@@ -278,6 +321,24 @@
     </div>
   </div>
 
+  <div class="sec"><h2>Management</h2><span class="seclabel">HIGHER MODEL · OVERNIGHT</span></div>
+  <div class="card mgr" id="mgrcard">
+    <div class="strip"></div>
+    <div class="in">
+      <div class="row1">
+        <div class="ovface"><span id="ovrobot"></span><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span></div>
+        <div class="mid">
+          <div class="nm">Overseer <span class="mdl opus">Opus</span></div>
+          <div class="desc">Audits every system you control and fixes what's broken on its own — no prompt. Promotes a worker to a bigger model when it falls behind.</div>
+        </div>
+        <div class="switch" id="ovtgl" role="switch" aria-checked="false" aria-label="Toggle Overseer" tabindex="0"><span class="knob"></span></div>
+      </div>
+      <div class="sys" id="ovsys"></div>
+      <div class="mstats"><span><b id="ovau">0</b>swept</span><span><b id="ovfx">0</b>fixed</span><span><b id="ovpr">0</b>promoted</span></div>
+      <div class="ovstate" id="ovstate"><span class="pulse"></span><span id="ovstatetxt">Standby</span></div>
+    </div>
+  </div>
+
   <div class="sec"><h2>Agents</h2><button class="addbtn" id="addtop">+ New agent</button></div>
   <div class="agrid" id="agrid"></div>
 
@@ -304,7 +365,7 @@
   function haptic(kind){ if (TG && TG.HapticFeedback){ try{ TG.HapticFeedback.impactOccurred(kind||"light"); }catch(e){} } }
 
   var $ = function(s){ return document.querySelector(s); };
-  var STORE = "agentdeck.v1";
+  var STORE = "agentdeck.v2";
   var COLORS = [
     {b:"#22d3ee", g:"#c7f4fb"}, {b:"#a78bfa", g:"#e7defd"}, {b:"#34d399", g:"#cdf6e6"},
     {b:"#fbbf24", g:"#fdeec4"}, {b:"#f472b6", g:"#fcd9ec"}, {b:"#60a5fa", g:"#d6e6fe"},
@@ -331,21 +392,44 @@
     return s + '</svg>';
   }
 
+  // Workers — hyper-focused on building & expanding the businesses. Start on Haiku.
   var DEFAULTS = [
-    { id:"scout",  name:"Scout",  use:"Scan FB Marketplace for underpriced iPhones around Bognor", enabled:true, pinned:true,
-      pool:["scanned 34 new listings","flagged iPhone 13 @ £180 (est +£95)","filtered 7 out-of-area posts","matched 2 to comps DB"] },
-    { id:"ledger", name:"Ledger", use:"Track token spend and running costs across every agent", enabled:true, pinned:false,
-      pool:["reconciled daily spend","cost/agent report built","budget check: 62% of cap","logged 1,204 tokens to sheet"] },
-    { id:"forge",  name:"Forge",  use:"Draft and post resale listings once a deal is confirmed", enabled:false, pinned:false,
-      pool:["drafted listing copy","generated 3 photo captions","queued eBay cross-post","priced item at £275"] },
-    { id:"sentry", name:"Sentry", use:"Watch confirmed listings for price drops and alert me", enabled:true, pinned:false,
-      pool:["price drop: -£20 on watch #4","sent Telegram alert","re-checked 12 watched items","no changes in last sweep"] }
+    { id:"scout",  name:"Scout",  model:"haiku", use:"Hunt new revenue — underpriced iPhones and fresh niches worth expanding into", enabled:true, pinned:true,
+      pool:["found iPhone 12 @ £150 (est +£80)","spotted gap: valet CRM add-on","scanned 40 listings, 3 worth flipping","mapped a niche to test next"] },
+    { id:"forge",  name:"Forge",  model:"haiku", use:"Build & ship — SaaS features, resale listings and landing pages", enabled:true, pinned:false,
+      pool:["shipped booking-reminder feature","drafted 4 resale listings","built the SaaS pricing page","cross-posted to eBay + Gumtree"] },
+    { id:"reach",  name:"Reach",  model:"haiku", use:"Grow demand — TikTok content, outreach and creator collabs", enabled:true, pinned:false,
+      pool:["scripted 3 TikToks for the arb bot","DM'd 12 creators for collabs","A/B tested an ad hook","booked 2 valeting enquiries"] },
+    { id:"ledger", name:"Ledger", model:"haiku", use:"Guard margins — spend, costs and profit per venture", enabled:false, pinned:false,
+      pool:["profit-per-venture report built","flagged Atom nearing budget cap","reconciled £ spend to sheet","margin check: flip #4 +£72"] }
   ];
+
+  // Overseer audit targets — the real infra within your control
+  var SYSTEMS = ["automation-lab","VPS cron","FB scraper","Telegram bridge","GitHub","Obsidian vault"];
+  var AUDITS = [
+    { sys:"FB scraper",      find:"Playwright session stale 6h", fix:"restarted + re-authed burner" },
+    { sys:"VPS cron",        find:"iphone-flip loop missed a run", fix:"re-queued and reset timer" },
+    { sys:"Telegram bridge", find:"allow-rule gap on a new cap", fix:"patched bridge.py allowlist" },
+    { sys:"GitHub",          find:"gym-trace Pages build failing", fix:"fixed workflow + redeployed" },
+    { sys:"automation-lab",  find:"Atom log rotation full", fix:"rotated and archived logs" },
+    { sys:"Obsidian vault",  find:"sync conflict on JARVIS.md", fix:"merged and pushed clean" }
+  ];
+  var TIERS = ["haiku","sonnet","opus"];
 
   var state = load();
   function load(){
-    try { var s = JSON.parse(localStorage.getItem(STORE)); if (s && s.agents) return s; } catch(e){}
-    return { power:false, tokens:0, agents: DEFAULTS.map(function(a){ return Object.assign({tokens:0,tasks:0}, a); }) };
+    var base = { power:false, tokens:0,
+      mgr: { enabled:false, tokens:0, audits:0, fixes:0, promos:0 },
+      agents: DEFAULTS.map(function(a){ return Object.assign({tokens:0,tasks:0,model:"haiku"}, a); }) };
+    try {
+      var s = JSON.parse(localStorage.getItem(STORE));
+      if (s && s.agents) {
+        if (!s.mgr) s.mgr = base.mgr;
+        s.agents.forEach(function(a){ if (!a.model) a.model = "haiku"; });
+        return s;
+      }
+    } catch(e){}
+    return base;
   }
   function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e){} }
 
@@ -368,7 +452,7 @@
       el.innerHTML =
         (a.pinned? '<svg class="pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>':"") +
         '<div class="top2"><div class="face">'+robot(a.id)+'</div><div><div class="nm">'+esc(a.name)+'</div><div class="role">'+esc(a.use)+'</div></div></div>' +
-        '<div class="st"><span class="d"></span>'+stTxt+'</div>';
+        '<div class="foot"><div class="st"><span class="d"></span>'+stTxt+'</div><span class="mdl '+(a.model||"haiku")+'">'+cap(a.model||"haiku")+'</span></div>';
       el.addEventListener("click", function(){ haptic("light"); openDetail(a.id); });
       grid.appendChild(el);
     });
@@ -394,6 +478,23 @@
       pill.className = "statepill"; $("#statetxt").textContent = "STANDBY";
     }
     $("#coresub").innerHTML = "<b>"+act+"</b> of <b>"+total+"</b> agents active";
+  }
+
+  function buildChips(){
+    $("#ovsys").innerHTML = SYSTEMS.map(function(s){ return '<span class="chip"><span class="d"></span>'+esc(s)+'</span>'; }).join("");
+  }
+  function renderMgr(){
+    var c=$("#mgrcard"), active = state.power && state.mgr.enabled;
+    c.classList.toggle("active", active);
+    var tg=$("#ovtgl"); tg.classList.toggle("on", !!state.mgr.enabled); tg.setAttribute("aria-checked", state.mgr.enabled?"true":"false");
+    $("#ovau").textContent = state.mgr.audits;
+    $("#ovfx").textContent = state.mgr.fixes;
+    $("#ovpr").textContent = state.mgr.promos;
+    var t;
+    if (!state.power) t = state.mgr.enabled ? "Armed — start the deck to run" : "Standby — audits when armed";
+    else if (state.mgr.enabled) t = "Autonomous — auditing "+SYSTEMS.length+" systems overnight";
+    else t = "Off — flip on for hands-off fixing";
+    $("#ovstatetxt").textContent = t;
   }
 
   var series = [];
@@ -453,11 +554,54 @@
   function startLoop(){ if (!timer) timer=setInterval(tick, 1500); }
   function stopLoop(){ clearInterval(timer); timer=null; }
 
+  // ---- Overseer (management) loop ----
+  var mgrTimer=null;
+  function startMgr(){ if (!mgrTimer) mgrTimer=setInterval(mgrTick, 5200); }
+  function stopMgr(){ clearInterval(mgrTimer); mgrTimer=null; }
+  function mgrTick(){
+    if (!state.power || !state.mgr.enabled) return;
+    var roll=Math.random(), tk;
+    var cands = state.agents.filter(function(a){ return a.enabled && a.model!=="opus"; });
+    if (roll < 0.28 && cands.length){
+      var a = cands[Math.floor(Math.random()*cands.length)];
+      a.model = TIERS[TIERS.indexOf(a.model)+1];
+      tk = 900 + Math.floor(Math.random()*1700); state.mgr.promos++;
+      mgrLog("promoted "+a.name+" → "+cap(a.model), "output quality below bar — upgraded model", tk);
+      renderAgents();
+    } else if (roll < 0.86){
+      var au = AUDITS[Math.floor(Math.random()*AUDITS.length)];
+      tk = 800 + Math.floor(Math.random()*1800); state.mgr.audits++; state.mgr.fixes++;
+      mgrLog("fixed "+au.sys, au.find+" → "+au.fix, tk);
+    } else {
+      tk = 400 + Math.floor(Math.random()*500); state.mgr.audits++;
+      mgrLog("swept "+SYSTEMS.length+" systems", "all green", tk);
+    }
+    state.mgr.tokens += tk; state.tokens += tk;
+    series.push(state.tokens); if (series.length>40) series.shift();
+    renderTokens(); renderGraph(); renderMgr(); save();
+  }
+  function mgrLog(title, msg, tk){
+    var body=$("#logbody"), em=$("#logempty"); if (em) em.remove();
+    var row=document.createElement("div"); row.className="logrow mgr";
+    var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
+    row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">Overseer</span><span class="msg">'+esc(title)+' — '+esc(msg)+'</span><span class="tk">+'+tk+'</span>';
+    body.insertBefore(row, body.firstChild);
+    while (body.children.length>40) body.removeChild(body.lastChild);
+  }
+
   $("#powerbtn").addEventListener("click", function(){
     state.power=!state.power; save(); haptic("medium");
-    renderCore(); renderAgents(); renderTokens();
-    if (state.power) startLoop(); else stopLoop();
+    renderCore(); renderAgents(); renderTokens(); renderMgr();
+    if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
+    else { stopLoop(); stopMgr(); }
   });
+
+  function toggleOverseer(){
+    state.mgr.enabled = !state.mgr.enabled; save(); haptic("medium"); renderMgr();
+    if (state.power && state.mgr.enabled) startMgr(); else stopMgr();
+  }
+  $("#ovtgl").addEventListener("click", toggleOverseer);
+  $("#ovtgl").addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleOverseer(); } });
 
   var scrim=$("#scrim"), sheet=$("#sheet");
   function closeSheet(){ scrim.classList.remove("show"); }
@@ -485,7 +629,7 @@
     sheet.innerHTML =
       '<div class="grab"></div>' +
       '<div class="detail-head"><div class="bigface">'+robot(a.id)+'</div>' +
-        '<div><h3>'+esc(a.name)+'</h3><div class="role2">'+esc(a.use)+'</div></div></div>' +
+        '<div><h3>'+esc(a.name)+' <span class="mdl '+(a.model||"haiku")+'" style="vertical-align:middle;">'+cap(a.model||"haiku")+'</span></h3><div class="role2">'+esc(a.use)+'</div></div></div>' +
       '<div class="stats">' +
         '<div class="stat"><div class="v tabnum">'+fmt(a.tokens||0)+'</div><div class="k">tokens</div></div>' +
         '<div class="stat"><div class="v tabnum">'+(a.tasks||0)+'</div><div class="k">tasks</div></div>' +
@@ -507,11 +651,14 @@
   $("#addtop").addEventListener("click", function(){ haptic("light"); openAdd(); });
 
   function fmt(n){ return (n||0).toLocaleString("en-US"); }
+  function cap(s){ s=String(s); return s.charAt(0).toUpperCase()+s.slice(1); }
   function pad2(n){ return n<10?"0"+n:""+n; }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
-  renderAgents(); renderCore(); renderTokens(); renderGraph();
-  if (state.power) startLoop();
+  document.getElementById("ovrobot").innerHTML = robot("overseer");
+  buildChips();
+  renderAgents(); renderCore(); renderTokens(); renderGraph(); renderMgr();
+  if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
 })();
 </script>
 </body>
