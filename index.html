@@ -149,6 +149,18 @@
   .core .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
   .core .sub b { color: var(--ink); }
 
+  /* command / prompt line */
+  .cmd { padding: 13px 14px; }
+  .cmdrow { display: flex; gap: 8px; align-items: center; }
+  .cmd input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 12px 13px; color: var(--ink); font-family: var(--sans); font-size: 16px; }
+  .cmd input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  .cmd button { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 11px; border: none; background: var(--accent); color: #04222a; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
+  .cmd button:active { transform: scale(.94); }
+  .cmd button svg { width: 20px; height: 20px; }
+  .cmdhint { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mut); margin-top: 9px; line-height: 1.4; }
+  .cmdhint.sent { color: var(--good); }
+  .cmdhint b { color: var(--ink-2); font-weight: 600; }
+
   .graph-head { display: flex; align-items: baseline; justify-content: space-between; padding: 15px 16px 4px; }
   .graph-head .t { font-size: 12px; color: var(--ink-mut); font-family: var(--mono); letter-spacing: .5px; text-transform: uppercase; }
   .graph-head .big { font-size: 24px; font-weight: 680; letter-spacing: -.5px; }
@@ -286,7 +298,7 @@
       <div class="mk">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4" fill="currentColor"/><path d="M9 14h.01M15 14h.01"/></svg>
       </div>
-      <div><h1>Agent Deck</h1><span>mission control</span></div>
+      <div><h1>Agent Deck</h1><span id="brandsub">atom · demo</span></div>
     </div>
     <div class="statepill" id="statepill"><span class="dot"></span><span id="statetxt">STANDBY</span></div>
   </div>
@@ -300,6 +312,16 @@
       <span class="core-state" id="corestate">TAP TO START</span>
     </button>
     <div class="sub" id="coresub"><b>0</b> of <b>0</b> agents active</div>
+  </div>
+
+  <div class="card cmd">
+    <div class="cmdrow">
+      <input id="cmdinput" placeholder="Tell Atom what to focus on…" autocomplete="off" enterkeyhint="send"/>
+      <button id="cmdsend" aria-label="Send instruction">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="cmdhint" id="cmdhint">Leave blank &amp; send → Atom runs an <b>audit</b>, finds optimisations &amp; expansion, then acts.</div>
   </div>
 
   <div class="card">
@@ -590,6 +612,7 @@
   }
 
   $("#powerbtn").addEventListener("click", function(){
+    if (LIVE){ liveToggleAtom(); return; }
     state.power=!state.power; save(); haptic("medium");
     renderCore(); renderAgents(); renderTokens(); renderMgr();
     if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
@@ -602,6 +625,99 @@
   }
   $("#ovtgl").addEventListener("click", toggleOverseer);
   $("#ovtgl").addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleOverseer(); } });
+
+  // ---------- LIVE mode: mirror the real Atom via data.json ----------
+  var LIVE = false;
+  function fmtClock(iso){ if(!iso) return "--:--"; var d=new Date(iso); return isNaN(d)? "--:--" : pad2(d.getHours())+":"+pad2(d.getMinutes()); }
+  function prettyName(id){ return String(id).split(/[-_]/).map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(" "); }
+
+  function applyLive(d){
+    if (!d || !d.status) return;
+    LIVE = true; stopLoop(); stopMgr();
+    $("#brandsub").textContent = "atom · live";
+
+    state.power = (d.status === "active");
+    renderCore();
+    $("#corestate").textContent = state.power ? "TAP TO PAUSE" : "TAP TO START";
+
+    state.tokens = (d.tokens && d.tokens.total) || 0;
+    series = []; for (var i=0;i<40;i++){ series.push(Math.round(state.tokens*(0.82+0.18*(i/39)))); }
+    renderTokens(); renderGraph();
+    $("#rate").className = "rate tabnum" + (state.power ? "" : " idle");
+    $("#rate").textContent = state.power ? "▲ live" : "— paused";
+
+    if (Array.isArray(d.ventures) && d.ventures.length){
+      state.agents = d.ventures.map(function(v){
+        return { id:"v-"+v.id, name: prettyName(v.id), use: v.summary || v.type || "venture",
+                 enabled: v.status === "active", pinned:false, model: d.workerModel || "opus",
+                 tokens:0, tasks:0 };
+      });
+      renderAgents();
+      var act = state.power ? state.agents.filter(function(a){ return a.enabled; }).length : 0;
+      $("#coresub").innerHTML = "<b>"+act+"</b> of <b>"+state.agents.length+"</b> ventures active";
+    }
+
+    $("#ovstatetxt").textContent = state.power
+      ? "Autonomous — Atom live · worker model " + (d.workerModel || "opus")
+      : "Paused — " + (d.reason || "resume from the core or Telegram");
+    $("#mgrcard").classList.toggle("active", state.power);
+
+    var body=$("#logbody"); body.innerHTML="";
+    var items = d.activity || [];
+    if (d.checkin && d.checkin.awaitingReply){
+      var cr=document.createElement("div"); cr.className="logrow mgr";
+      cr.innerHTML='<span class="tm">'+fmtClock(d.checkin.askedAt)+'</span><span class="ok">◆</span><span class="ag">Check-in</span><span class="msg">morning check-in — awaiting your pick ('+(d.checkin.candidates||[]).length+' options)</span>';
+      body.appendChild(cr);
+    }
+    if (!items.length && !(d.checkin && d.checkin.awaitingReply)){
+      body.innerHTML='<div class="empty">No recent activity — Atom is '+esc(d.status)+'.</div>';
+    } else {
+      items.forEach(function(it){
+        var block = it.kind === "block";
+        var row=document.createElement("div"); row.className = "logrow" + (block ? " mgr" : "");
+        row.innerHTML='<span class="tm">'+fmtClock(it.time)+'</span><span class="ok">'+(block?"◆":"✓")+'</span>'+
+          '<span class="ag">'+esc(block ? ("block/"+(it.type||"soft")) : (it.venture||"atom"))+'</span>'+
+          '<span class="msg">'+esc(it.text||"")+'</span>';
+        body.appendChild(row);
+      });
+    }
+  }
+  window.__applyLive = applyLive; // local testing hook
+
+  async function loadLive(){
+    try { var r = await fetch("data.json", { cache:"no-store" }); if (!r.ok) return false;
+      applyLive(await r.json()); return true;
+    } catch(e){ return false; }
+  }
+
+  // ---------- prompt line / command ----------
+  function queueCommand(obj, kind){
+    try { localStorage.setItem("agentdeck.pending."+kind, JSON.stringify(obj)); } catch(e){}
+  }
+  function sendCommand(){
+    var input=$("#cmdinput"), hint=$("#cmdhint"), text=input.value.trim();
+    queueCommand({ type:"atom-command", text:text, at:new Date().toISOString() }, "command");
+    haptic("medium");
+    var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
+    var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
+    var row=document.createElement("div"); row.className="logrow mgr";
+    row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(text ? ("command: "+text) : "command: blank → audit → optimise → expand")+'</span>';
+    body.insertBefore(row, body.firstChild);
+    input.value="";
+    hint.className="cmdhint sent";
+    hint.textContent = "Queued ✓ — Atom runs it on the next tick once the VPS link is connected.";
+  }
+  $("#cmdsend").addEventListener("click", sendCommand);
+  $("#cmdinput").addEventListener("keydown", function(e){ if (e.key==="Enter"){ e.preventDefault(); sendCommand(); } });
+
+  function liveToggleAtom(){
+    var want = !state.power;
+    queueCommand({ type:"atom-control", action: want?"resume":"pause", at:new Date().toISOString() }, "control");
+    haptic("medium");
+    state.power = want; renderCore();
+    $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
+    $("#coresub").innerHTML = "queued — connect VPS to " + (want ? "resume" : "pause") + " Atom";
+  }
 
   var scrim=$("#scrim"), sheet=$("#sheet");
   function closeSheet(){ scrim.classList.remove("show"); }
@@ -659,6 +775,9 @@
   buildChips();
   renderAgents(); renderCore(); renderTokens(); renderGraph(); renderMgr();
   if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
+  // attach to the real Atom if a data feed is present; otherwise the demo above stands
+  loadLive();
+  setInterval(loadLive, 30000);
 })();
 </script>
 </body>
