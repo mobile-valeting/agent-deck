@@ -684,9 +684,18 @@
   }
   window.__applyLive = applyLive; // local testing hook
 
+  function tgHeaders(){ return (TG && TG.initData) ? { "X-Telegram-Init-Data": TG.initData } : {}; }
   async function loadLive(){
-    try { var r = await fetch("data.json", { cache:"no-store" }); if (!r.ok) return false;
+    try { var r = await fetch("data.json", { cache:"no-store", headers: tgHeaders() }); if (!r.ok) return false;
       applyLive(await r.json()); return true;
+    } catch(e){ return false; }
+  }
+  async function apiPost(pathname, obj){
+    try {
+      var r = await fetch(pathname, { method:"POST",
+        headers: Object.assign({ "content-type":"application/json" }, tgHeaders()),
+        body: JSON.stringify(obj) });
+      return r.ok;
     } catch(e){ return false; }
   }
 
@@ -694,29 +703,33 @@
   function queueCommand(obj, kind){
     try { localStorage.setItem("agentdeck.pending."+kind, JSON.stringify(obj)); } catch(e){}
   }
-  function sendCommand(){
+  async function sendCommand(){
     var input=$("#cmdinput"), hint=$("#cmdhint"), text=input.value.trim();
-    queueCommand({ type:"atom-command", text:text, at:new Date().toISOString() }, "command");
-    haptic("medium");
     var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
     var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
     var row=document.createElement("div"); row.className="logrow mgr";
     row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(text ? ("command: "+text) : "command: blank → audit → optimise → expand")+'</span>';
     body.insertBefore(row, body.firstChild);
-    input.value="";
-    hint.className="cmdhint sent";
-    hint.textContent = "Queued ✓ — Atom runs it on the next tick once the VPS link is connected.";
+    input.value=""; haptic("medium");
+    hint.className="cmdhint"; hint.textContent="Sending…";
+    var ok = await apiPost("/api/command", { text: text });
+    hint.className = "cmdhint sent";
+    if (ok){ hint.textContent = "Sent ✓ — Atom runs it on its next tick."; setTimeout(loadLive, 1500); }
+    else { queueCommand({ type:"atom-command", text:text, at:new Date().toISOString() }, "command");
+           hint.textContent = "Queued — no VPS link yet (demo mode)."; }
   }
   $("#cmdsend").addEventListener("click", sendCommand);
   $("#cmdinput").addEventListener("keydown", function(e){ if (e.key==="Enter"){ e.preventDefault(); sendCommand(); } });
 
-  function liveToggleAtom(){
-    var want = !state.power;
-    queueCommand({ type:"atom-control", action: want?"resume":"pause", at:new Date().toISOString() }, "control");
-    haptic("medium");
-    state.power = want; renderCore();
-    $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
-    $("#coresub").innerHTML = "queued — connect VPS to " + (want ? "resume" : "pause") + " Atom";
+  async function liveToggleAtom(){
+    var want = !state.power; haptic("medium");
+    var ok = await apiPost("/api/control", { action: want ? "resume" : "pause" });
+    if (ok){ state.power = want; renderCore();
+      $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
+      $("#coresub").innerHTML = "Atom " + (want ? "resuming" : "pausing") + "…"; setTimeout(loadLive, 1500); }
+    else { queueCommand({ type:"atom-control", action: want?"resume":"pause", at:new Date().toISOString() }, "control");
+      state.power = want; renderCore();
+      $("#coresub").innerHTML = "queued — no VPS link yet"; }
   }
 
   var scrim=$("#scrim"), sheet=$("#sheet");
