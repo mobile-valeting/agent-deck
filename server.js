@@ -42,9 +42,15 @@ function verifyInitData(initData) {
   if (ALLOWED_USER && String(user && user.id) !== String(ALLOWED_USER)) return { ok: false, reason: 'user not allowed' };
   return { ok: true, user };
 }
+let lastLoggedUser = null;
 function auth(req) {
   if (DEV_NO_AUTH) return { ok: true, user: { id: 'dev' } };
-  return verifyInitData(String(req.headers['x-telegram-init-data'] || ''));
+  const r = verifyInitData(String(req.headers['x-telegram-init-data'] || ''));
+  if (r.ok && r.user && r.user.id && r.user.id !== lastLoggedUser) {
+    lastLoggedUser = r.user.id;
+    console.log('authenticated Telegram user id:', r.user.id, r.user.username || r.user.first_name || '');
+  }
+  return r;
 }
 
 const sendJSON = (res, code, obj) => { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); };
@@ -55,6 +61,11 @@ const server = http.createServer(async (req, res) => {
   const p = new URL(req.url, `http://${req.headers.host}`).pathname;
 
   if (p === '/health') return sendJSON(res, 200, { ok: true });
+
+  if (p === '/whoami') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    return sendJSON(res, 200, { ok: true, user: a.user });
+  }
 
   if (p === '/data.json') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
