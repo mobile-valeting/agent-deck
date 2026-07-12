@@ -145,7 +145,7 @@
   .core.on .powerbtn .core-state { color: var(--good); }
   .core.on .lbl.top { color: var(--good); }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse, .approvals .apphead .warndot { animation: none; } }
   .core .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
   .core .sub b { color: var(--ink); }
 
@@ -160,6 +160,20 @@
   .cmdhint { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mut); margin-top: 9px; line-height: 1.4; }
   .cmdhint.sent { color: var(--good); }
   .cmdhint b { color: var(--ink-2); font-weight: 600; }
+
+  /* approvals inbox — hard blocks that need your yes/no */
+  .approvals { border-color: rgba(251,191,36,.45); overflow: hidden; }
+  .approvals .apphead { display: flex; align-items: center; gap: 8px; padding: 12px 14px 0; font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--warn); }
+  .approvals .apphead .warndot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: ping 1.8s ease-out infinite; }
+  .approvals .appcount { margin-left: auto; color: var(--ink-mut); }
+  .appitem { padding: 12px 14px; border-top: 1px solid var(--border); }
+  .appitem:first-child { border-top: none; }
+  .apptxt { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+  .appbtns { display: flex; gap: 8px; margin-top: 11px; }
+  .appbtn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); font-family: var(--sans); font-size: 13px; font-weight: 650; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
+  .appbtn:active { transform: scale(.97); }
+  .appbtn.ok { background: var(--good-sft); border-color: var(--good-sft); color: var(--good); }
+  .appbtn.no { background: var(--danger-sft); border-color: var(--danger-sft); color: var(--danger); }
 
   .graph-head { display: flex; align-items: baseline; justify-content: space-between; padding: 15px 16px 4px; }
   .graph-head .t { font-size: 12px; color: var(--ink-mut); font-family: var(--mono); letter-spacing: .5px; text-transform: uppercase; }
@@ -322,6 +336,11 @@
       </button>
     </div>
     <div class="cmdhint" id="cmdhint">Leave blank &amp; send → Atom runs an <b>audit</b>, finds optimisations &amp; expansion, then acts.</div>
+  </div>
+
+  <div class="card approvals" id="approvals" style="display:none;">
+    <div class="apphead"><span class="warndot"></span>Needs you<span class="appcount" id="appcount"></span></div>
+    <div id="applist"></div>
   </div>
 
   <div class="card">
@@ -662,6 +681,8 @@
       : "Paused — " + (d.reason || "resume from the core or Telegram");
     $("#mgrcard").classList.toggle("active", state.power);
 
+    renderApprovals(d.approvals);
+
     var body=$("#logbody"); body.innerHTML="";
     var items = d.activity || [];
     if (d.checkin && d.checkin.awaitingReply){
@@ -697,6 +718,35 @@
         body: JSON.stringify(obj) });
       return r.ok;
     } catch(e){ return false; }
+  }
+
+  // ---------- approvals inbox ----------
+  function renderApprovals(list){
+    var wrap=$("#approvals"), box=$("#applist"); list = list || [];
+    if (!list.length){ wrap.style.display="none"; box.innerHTML=""; return; }
+    wrap.style.display=""; $("#appcount").textContent = list.length;
+    box.innerHTML = list.map(function(b){
+      return '<div class="appitem" data-id="'+esc(b.id)+'"><div class="apptxt">'+esc(b.summary)+'</div>'+
+        '<div class="appbtns"><button class="appbtn ok" data-d="approve">Approve</button>'+
+        '<button class="appbtn no" data-d="reject">Reject</button></div></div>';
+    }).join("");
+    box.querySelectorAll(".appbtn").forEach(function(btn){
+      btn.addEventListener("click", function(){ decideApproval(btn.closest(".appitem").getAttribute("data-id"), btn.getAttribute("data-d"), btn); });
+    });
+  }
+  async function decideApproval(id, decision, btn){
+    var item = btn.closest(".appitem"); item.style.opacity=".5"; haptic("medium");
+    var ok = await apiPost("/api/approve", { id:id, decision:decision });
+    if (ok){
+      var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
+      var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
+      var row=document.createElement("div"); row.className="logrow mgr";
+      row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(decision==="approve"?"approved ":"rejected ")+esc(id)+'</span>';
+      body.insertBefore(row, body.firstChild);
+      item.remove();
+      if (!$("#applist").children.length) $("#approvals").style.display="none";
+      setTimeout(loadLive, 2500);
+    } else { item.style.opacity="1"; }
   }
 
   // ---------- prompt line / command ----------

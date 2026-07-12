@@ -92,6 +92,26 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, { ok: true, queued: text || '(blank → audit → optimise → expand)' });
   }
 
+  if (p === '/api/approve' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const id = String(j.id || '').slice(0, 40);
+    const decision = j.decision === 'approve' ? 'approve' : j.decision === 'reject' ? 'reject' : null;
+    const note = String(j.note || '').slice(0, 500);
+    if (!id || !decision) return sendJSON(res, 400, { error: 'need id + decision (approve|reject)' });
+    let task = '';
+    try { const bl = JSON.parse(fs.readFileSync(path.join(ATOM, 'state', 'blocked.json'), 'utf8'));
+      const b = (bl.blocks || []).find(x => x.id === id); if (b) task = b.task; } catch {}
+    const verb = decision === 'approve' ? 'APPROVED — go ahead' : 'REJECTED — do not proceed; drop or defer it';
+    const text = `[Agent Deck] Block ${id}${task !== '' ? ` (task #${task})` : ''}: ${verb}.${note ? ' ' + note : ''}`;
+    // feed Atom's existing block-reply path (worker Step 1 reads inbox.jsonl)
+    const line = JSON.stringify({ update_id: 0, date: Math.floor(Date.now() / 1000), text, source: 'agent-deck' }) + '\n';
+    try { fs.appendFileSync(path.join(ATOM, 'state', 'inbox.jsonl'), line); }
+    catch { return sendJSON(res, 500, { error: 'write failed' }); }
+    kickWorker();
+    return sendJSON(res, 200, { ok: true, id, decision });
+  }
+
   if (p === '/api/control' && req.method === 'POST') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
     let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
