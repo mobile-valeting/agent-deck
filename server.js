@@ -53,6 +53,13 @@ function auth(req) {
   return r;
 }
 
+// fire a worker tick right now (detached) so a command runs within seconds, not on
+// the next 15-min cron. run-worker.sh self-gates on control status + the flock lock.
+function kickWorker() {
+  try { const cp = require('child_process').spawn('bash', [path.join(ATOM, 'loop', 'run-worker.sh')], { detached: true, stdio: 'ignore' }); cp.unref(); }
+  catch (e) {}
+}
+
 const sendJSON = (res, code, obj) => { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); };
 const readBody = (req) => new Promise((resolve) => { let d = ''; req.on('data', c => { d += c; if (d.length > 1e5) req.destroy(); }); req.on('end', () => resolve(d)); });
 const CT = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
@@ -81,6 +88,7 @@ const server = http.createServer(async (req, res) => {
     const cmd = { comment: 'Set by Agent Deck prompt line.', text, status: 'pending', source: 'dashboard', setAt: new Date().toISOString(), pickedUpAt: null };
     try { fs.writeFileSync(path.join(ATOM, 'state', 'command.json'), JSON.stringify(cmd, null, 2) + '\n'); }
     catch { return sendJSON(res, 500, { error: 'write failed' }); }
+    kickWorker();
     return sendJSON(res, 200, { ok: true, queued: text || '(blank → audit → optimise → expand)' });
   }
 
@@ -91,6 +99,7 @@ const server = http.createServer(async (req, res) => {
     if (!action) return sendJSON(res, 400, { error: 'action must be pause|resume' });
     return execFile('bash', [path.join(ATOM, 'loop', 'control.sh'), action, 'via Agent Deck'], (err, so, se) => {
       if (err) return sendJSON(res, 500, { error: 'control failed', detail: String(se || err) });
+      if (action === 'resume') kickWorker();
       return sendJSON(res, 200, { ok: true, action, out: String(so).trim() });
     });
   }

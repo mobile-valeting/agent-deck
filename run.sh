@@ -3,6 +3,7 @@
 # No root needed. Tailscale serve/funnel config persists in the daemon state, so it
 # reapplies automatically once tailscaled is back. Run at boot via @reboot cron.
 export PATH="/home/tris/.nvm/versions/node/v20.20.2/bin:/home/tris/.local/bin:/usr/bin:/bin:$PATH"
+export ALLOWED_TG_USER=5964598698   # lock the API to Tris's Telegram user id only
 SOCK=/home/tris/.tailscale/tailscaled.sock
 
 # 1. userspace tailscaled
