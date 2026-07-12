@@ -92,6 +92,34 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, { ok: true, queued: text || '(blank → audit → optimise → expand)' });
   }
 
+  if (p === '/api/agent' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const file = path.join(ATOM, 'state', 'agents.json');
+    let store; try { store = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { store = { agents: [] }; }
+    store.agents = store.agents || [];
+    let changed = false, enabledNow = false;
+    if (j.delete && j.id) { store.agents = store.agents.filter(x => x.id !== j.id); changed = true; }
+    else if (j.id) {
+      const ag = store.agents.find(x => x.id === j.id);
+      if (ag) {
+        if (typeof j.enabled === 'boolean') { ag.enabled = j.enabled; enabledNow = j.enabled; }
+        if (typeof j.brief === 'string') ag.brief = j.brief.slice(0, 600);
+        if (typeof j.name === 'string' && j.name.trim()) ag.name = j.name.slice(0, 40);
+        changed = true;
+      }
+    } else if (j.name) {
+      let model = 'opus';
+      try { model = String(JSON.parse(fs.readFileSync(path.join(ATOM, 'config.json'), 'utf8')).workerModel || 'opus').replace(/^claude-/, ''); } catch {}
+      store.agents.push({ id: 'a' + Date.now(), name: j.name.slice(0, 40), brief: String(j.brief || '').slice(0, 600), enabled: j.enabled !== false, model });
+      changed = true; enabledNow = true;
+    }
+    if (!changed) return sendJSON(res, 400, { error: 'need id, name, or delete' });
+    try { fs.writeFileSync(file, JSON.stringify(store, null, 2) + '\n'); } catch { return sendJSON(res, 500, { error: 'write failed' }); }
+    if (enabledNow) kickWorker();
+    return sendJSON(res, 200, { ok: true });
+  }
+
   if (p === '/api/approve' && req.method === 'POST') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
     let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}

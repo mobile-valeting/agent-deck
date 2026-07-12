@@ -200,7 +200,7 @@
   .agent .top2 { display: flex; align-items: center; gap: 10px; }
   .agent .face { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 11px; background: var(--screen); display: grid; place-items: center; overflow: hidden; }
   .agent .face svg { width: 40px; height: 40px; }
-  .agent .nm { font-size: 13.5px; font-weight: 640; line-height: 1.1; }
+  .agent .nm { font-size: 13.5px; font-weight: 640; line-height: 1.1; overflow-wrap: anywhere; }
   .agent .role { font-size: 10.5px; color: var(--ink-mut); font-family: var(--mono); margin-top: 3px; line-height: 1.25;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .agent .st { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: .4px; color: var(--ink-mut); text-transform: uppercase; }
@@ -210,6 +210,11 @@
   .agent.idle .st { color: var(--warn); }
   .agent.idle .st .d { background: var(--warn); }
   .agent .pin { position: absolute; top: 9px; right: 9px; color: var(--accent); width: 14px; height: 14px; }
+  .agent .txt { min-width: 0; padding-right: 28px; }
+  .agent .miniswitch { position: absolute; top: 10px; right: 10px; width: 38px; height: 22px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s ease, border-color .2s ease; z-index: 2; }
+  .agent .miniswitch .k { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink-mut); transition: transform .2s cubic-bezier(.4,0,.2,1), background .2s ease; }
+  .agent .miniswitch.on { background: var(--good-sft); border-color: var(--good-sft); }
+  .agent .miniswitch.on .k { transform: translateX(16px); background: var(--good); }
   .agent.add { align-items: center; justify-content: center; border-style: dashed; color: var(--accent); min-height: 104px; gap: 5px; }
   .agent.add .plus { font-size: 24px; line-height: 1; }
   .agent.add .txt { font-family: var(--mono); font-size: 11px; }
@@ -491,9 +496,10 @@
       el.className = "agent" + (a.enabled? "":" off") + (active? " act":"") + (a.enabled&&!state.power? " idle":"");
       var stTxt = active ? "active" : (a.enabled ? "ready" : "disabled");
       el.innerHTML =
-        (a.pinned? '<svg class="pin" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>':"") +
-        '<div class="top2"><div class="face">'+robot(a.id)+'</div><div><div class="nm">'+esc(a.name)+'</div><div class="role">'+esc(a.use)+'</div></div></div>' +
+        '<div class="miniswitch'+(a.enabled?" on":"")+'"><span class="k"></span></div>' +
+        '<div class="top2"><div class="face">'+robot(a.id)+'</div><div class="txt"><div class="nm">'+esc(a.name)+'</div><div class="role">'+esc(a.use)+'</div></div></div>' +
         '<div class="foot"><div class="st"><span class="d"></span>'+stTxt+'</div><span class="mdl '+(a.model||"haiku")+'">'+cap(a.model||"haiku")+'</span></div>';
+      el.querySelector(".miniswitch").addEventListener("click", function(ev){ ev.stopPropagation(); toggleAgent(a.id); });
       el.addEventListener("click", function(){ haptic("light"); openDetail(a.id); });
       grid.appendChild(el);
     });
@@ -665,15 +671,14 @@
     $("#rate").className = "rate tabnum" + (state.power ? "" : " idle");
     $("#rate").textContent = state.power ? "▲ live" : "— paused";
 
-    if (Array.isArray(d.ventures) && d.ventures.length){
-      state.agents = d.ventures.map(function(v){
-        return { id:"v-"+v.id, name: prettyName(v.id), use: v.summary || v.type || "venture",
-                 enabled: v.status === "active", pinned:false, model: d.workerModel || "opus",
-                 tokens:0, tasks:0 };
+    if (Array.isArray(d.agents) && d.agents.length){
+      state.agents = d.agents.map(function(a){
+        return { id:a.id, name:a.name, use:a.brief||"", enabled:!!a.enabled, pinned:false,
+                 model:a.model||d.workerModel||"opus", tokens:0, tasks:0 };
       });
       renderAgents();
-      var act = state.power ? state.agents.filter(function(a){ return a.enabled; }).length : 0;
-      $("#coresub").innerHTML = "<b>"+act+"</b> of <b>"+state.agents.length+"</b> ventures active";
+      var en = state.agents.filter(function(a){ return a.enabled; }).length;
+      $("#coresub").innerHTML = "<b>"+en+"</b> of <b>"+state.agents.length+"</b> agents enabled";
     }
 
     $("#ovstatetxt").textContent = state.power
@@ -749,6 +754,15 @@
     } else { item.style.opacity="1"; }
   }
 
+  // ---------- per-agent enable/disable ----------
+  async function toggleAgent(id){
+    var a = state.agents.filter(function(x){ return x.id===id; })[0]; if (!a) return;
+    var want = !a.enabled; a.enabled = want; haptic("light");
+    renderAgents(); renderCore();
+    if (LIVE){ var ok = await apiPost("/api/agent", { id:id, enabled:want }); if (ok) setTimeout(loadLive, 1500); }
+    else { save(); }
+  }
+
   // ---------- prompt line / command ----------
   function queueCommand(obj, kind){
     try { localStorage.setItem("agentdeck.pending."+kind, JSON.stringify(obj)); } catch(e){}
@@ -771,8 +785,17 @@
   $("#cmdsend").addEventListener("click", sendCommand);
   $("#cmdinput").addEventListener("keydown", function(e){ if (e.key==="Enter"){ e.preventDefault(); sendCommand(); } });
 
+  function confirmPause(){
+    return new Promise(function(resolve){
+      var msg = "Pause Atom? It stops all work until you resume it.";
+      if (TG && TG.showConfirm){ TG.showConfirm(msg, function(ok){ resolve(!!ok); }); }
+      else { resolve(window.confirm(msg)); }
+    });
+  }
   async function liveToggleAtom(){
-    var want = !state.power; haptic("medium");
+    var want = !state.power;
+    if (!want){ var okc = await confirmPause(); if (!okc) return; }  // confirm before pausing
+    haptic("medium");
     var ok = await apiPost("/api/control", { action: want ? "resume" : "pause" });
     if (ok){ state.power = want; renderCore();
       $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
@@ -794,37 +817,40 @@
       '<div class="btnrow"><button class="btn wide primary" id="savea">Save agent</button></div>' +
       '<div class="hint">Saved agents persist on this device.</div>';
     scrim.classList.add("show"); setTimeout(function(){ var n=$("#na"); if(n) n.focus(); },80);
-    $("#savea").addEventListener("click", function(){
+    $("#savea").addEventListener("click", async function(){
       var nm=$("#na").value.trim(), us=$("#nu").value.trim();
       if (!nm){ $("#na").focus(); return; }
-      state.agents.push({ id:"a"+Date.now(), name:nm, use:us||"General assistant", enabled:true, pinned:false, tokens:0, tasks:0 });
-      save(); haptic("medium"); renderAgents(); renderCore(); closeSheet();
+      haptic("medium");
+      if (LIVE){ await apiPost("/api/agent", { name:nm, brief:us }); closeSheet(); setTimeout(loadLive, 1200); }
+      else { state.agents.push({ id:"a"+Date.now(), name:nm, use:us||"General assistant", enabled:true, pinned:false, tokens:0, tasks:0 }); save(); renderAgents(); renderCore(); closeSheet(); }
     });
   }
 
   function openDetail(id){
     var a=state.agents.filter(function(x){return x.id===id;})[0]; if (!a) return;
-    var active = state.power && a.enabled;
+    var active = state.power && a.enabled, m = a.model||"haiku";
     sheet.innerHTML =
       '<div class="grab"></div>' +
       '<div class="detail-head"><div class="bigface">'+robot(a.id)+'</div>' +
-        '<div><h3>'+esc(a.name)+' <span class="mdl '+(a.model||"haiku")+'" style="vertical-align:middle;">'+cap(a.model||"haiku")+'</span></h3><div class="role2">'+esc(a.use)+'</div></div></div>' +
-      '<div class="stats">' +
-        '<div class="stat"><div class="v tabnum">'+fmt(a.tokens||0)+'</div><div class="k">tokens</div></div>' +
-        '<div class="stat"><div class="v tabnum">'+(a.tasks||0)+'</div><div class="k">tasks</div></div>' +
-        '<div class="stat"><div class="v" style="color:'+(active?"var(--good)":a.enabled?"var(--warn)":"var(--ink-mut)")+'">'+(active?"Active":a.enabled?"Ready":"Off")+'</div><div class="k">status</div></div>' +
-      '</div>' +
+        '<div><h3>'+esc(a.name)+' <span class="mdl '+m+'" style="vertical-align:middle;">'+cap(m)+'</span></h3>' +
+        '<div class="role2">'+(a.enabled?"Enabled":"Disabled")+(active?" · working now":a.enabled?" · idle (Atom paused)":"")+'</div></div></div>' +
+      '<div class="field"><label>What this agent does</label><textarea id="abrief" placeholder="Describe its job — Atom follows this as a standing directive">'+esc(a.use||"")+'</textarea></div>' +
+      '<div class="btnrow"><button class="btn primary wide" id="asave">Save brief</button></div>' +
       '<div class="btnrow">' +
-        '<button class="btn '+(a.enabled?"":"good")+'" id="ben">'+(a.enabled?"Disable":"Activate")+'</button>' +
-        '<button class="btn" id="bpin">'+(a.pinned?"Unpin":"Pin to top")+'</button>' +
-      '</div>' +
-      '<div class="btnrow"><button class="btn danger wide" id="bdel">Delete agent</button></div>';
+        '<button class="btn '+(a.enabled?"":"good")+'" id="ben">'+(a.enabled?"Disable":"Enable")+'</button>' +
+        '<button class="btn danger" id="bdel">Delete</button>' +
+      '</div>';
     scrim.classList.add("show");
-    $("#ben").addEventListener("click", function(){ a.enabled=!a.enabled; save(); haptic("light"); renderAgents(); renderCore(); openDetail(id); });
-    $("#bpin").addEventListener("click", function(){ a.pinned=!a.pinned; save(); haptic("light"); renderAgents(); openDetail(id); });
-    $("#bdel").addEventListener("click", function(){
-      state.agents=state.agents.filter(function(x){return x.id!==id;});
-      save(); haptic("medium"); renderAgents(); renderCore(); closeSheet();
+    $("#asave").addEventListener("click", async function(){
+      var v=$("#abrief").value.trim(); a.use=v; haptic("light"); renderAgents();
+      if (LIVE) await apiPost("/api/agent", { id:id, brief:v }); else save();
+      closeSheet();
+    });
+    $("#ben").addEventListener("click", function(){ toggleAgent(id); openDetail(id); });
+    $("#bdel").addEventListener("click", async function(){
+      state.agents=state.agents.filter(function(x){return x.id!==id;}); haptic("medium"); renderAgents(); renderCore();
+      if (LIVE) await apiPost("/api/agent", { id:id, delete:true }); else save();
+      closeSheet();
     });
   }
   $("#addtop").addEventListener("click", function(){ haptic("light"); openAdd(); });
