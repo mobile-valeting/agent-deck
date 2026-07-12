@@ -308,6 +308,71 @@
   .btn.danger { background: var(--danger-sft); border-color: var(--danger-sft); color: var(--danger); }
   .btn.wide { min-width: 100%; }
   .hint { font-size: 11.5px; color: var(--ink-mut); text-align: center; margin-top: 10px; font-family: var(--mono); }
+
+  /* ---- page nav ---- */
+  .nav { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+  .navbtn { flex: 1; padding: 9px; border: none; border-radius: 9px; background: transparent; color: var(--ink-2); font-family: var(--sans); font-size: 13px; font-weight: 640; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s ease, color .15s ease; }
+  .navbtn.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  #view-deck, #view-biz, #view-detail { display: flex; flex-direction: column; gap: 14px; }
+  [hidden] { display: none !important; }
+
+  /* ---- businesses list ---- */
+  .bizhead { font-size: 17px; font-weight: 680; letter-spacing: -.3px; padding: 2px 2px 0; display: flex; align-items: baseline; gap: 8px; }
+  .bizsub { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mut); font-weight: 400; }
+  .bizlist { display: flex; flex-direction: column; gap: 10px; }
+  .bizloading { color: var(--ink-mut); font-family: var(--mono); font-size: 12px; text-align: center; padding: 24px; }
+  .bizbtn { width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; cursor: pointer; box-shadow: var(--shadow); -webkit-tap-highlight-color: transparent; transition: transform .1s ease, border-color .2s ease; display: block; color: var(--ink); }
+  .bizbtn:active { transform: scale(.99); }
+  .bizbtn.umbrella { border-color: var(--accent-sft); background: linear-gradient(180deg, var(--accent-sft), transparent 60%), var(--surface); }
+  .bizbtn .brow { display: flex; align-items: center; gap: 10px; }
+  .bizbtn .bnm { font-size: 15px; font-weight: 660; letter-spacing: -.2px; }
+  .bizbtn .bgrp { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+  .bizbtn .chev { margin-left: auto; color: var(--ink-mut); font-size: 20px; line-height: 1; }
+  .stagepill { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; white-space: nowrap; }
+  .stagepill.live { color: var(--good); background: var(--good-sft); }
+  .stagepill.building { color: var(--accent); background: var(--accent-sft); }
+  .stagepill.idea { color: var(--ink-mut); background: var(--surface-3); }
+  .pbar { height: 7px; border-radius: 5px; background: var(--surface-3); overflow: hidden; margin-top: 11px; }
+  .pbar > span { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent), var(--good)); }
+  .bizbtn .pmeta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--ink-mut); margin-top: 6px; }
+
+  /* ---- business detail ---- */
+  .backbtn { align-self: flex-start; background: none; border: none; color: var(--accent); font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; padding: 2px 2px 0; margin-bottom: -4px; }
+  .dtitle { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
+  .dgroup { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mut); text-transform: uppercase; letter-spacing: .5px; margin-top: 3px; }
+  .dsum { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; margin-top: 12px; }
+  .dcard { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+  .dcard h3 { margin: 0 0 12px; font-size: 12px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .8px; color: var(--ink-mut); font-weight: 600; }
+  .bigprog { display: flex; align-items: baseline; gap: 10px; }
+  .bigprog .pct { font-size: 34px; font-weight: 720; letter-spacing: -1px; }
+  .bigprog .plbl { font-family: var(--mono); font-size: 11px; color: var(--ink-mut); }
+  .pbar.big { height: 12px; margin-top: 12px; }
+  .inc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .inc .box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 12px; }
+  .inc .box .v { font-size: 16px; font-weight: 660; }
+  .inc .box .k { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); text-transform: uppercase; margin-top: 3px; }
+  .brk { display: flex; flex-direction: column; gap: 12px; }
+  .brk .row .top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .brk .row .top .p { font-family: var(--mono); color: var(--ink-mut); }
+  .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .checks li { display: flex; gap: 9px; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+  .checks li::before { content: "○"; color: var(--ink-mut); flex: 0 0 auto; }
+  .checks.next li::before { content: "→"; color: var(--accent); }
+  .dbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chipbtn { font-family: var(--mono); font-size: 11.5px; color: var(--accent); background: var(--accent-sft); border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .enablebtn { width: 100%; padding: 12px; border-radius: 11px; border: 1px solid var(--good-sft); background: var(--good-sft); color: var(--good); font-family: var(--sans); font-weight: 650; font-size: 13.5px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .enablebtn.on { background: var(--surface-2); color: var(--ink-mut); border-color: var(--border); }
+  .flow { font-family: var(--mono); font-size: 12px; }
+  .fnode { padding: 6px 0 0 14px; border-left: 2px solid var(--border); margin-left: 9px; position: relative; }
+  .fnode::before { content: ""; position: absolute; left: -1px; top: 14px; width: 11px; height: 2px; background: var(--border); }
+  .fnode.root { border-left: none; margin-left: 0; padding-left: 0; }
+  .fnode.root::before { display: none; }
+  .flabel { display: flex; align-items: center; gap: 7px; }
+  .fkind { font-size: 8px; text-transform: uppercase; letter-spacing: .4px; padding: 1px 5px; border-radius: 4px; flex: 0 0 auto; }
+  .fkind.unit { background: var(--surface-3); color: var(--ink-mut); }
+  .fkind.contractor { background: var(--accent-sft); color: var(--accent); }
+  .fkind.channel { background: rgba(251,191,36,.14); color: var(--warn); }
+  .fcontact { font-size: 10.5px; color: var(--ink-mut); margin-top: 3px; line-height: 1.35; }
 </style>
 </head>
 <body>
@@ -322,6 +387,12 @@
     <div class="statepill" id="statepill"><span class="dot"></span><span id="statetxt">STANDBY</span></div>
   </div>
 
+  <div class="nav">
+    <button class="navbtn on" data-view="deck">Deck</button>
+    <button class="navbtn" data-view="biz">Businesses</button>
+  </div>
+
+  <div id="view-deck">
   <div class="card core" id="core">
     <div class="lbl top" id="corelbl">system standby</div>
     <button class="powerbtn" id="powerbtn" aria-label="Toggle agents">
@@ -391,6 +462,17 @@
   <div class="log">
     <div class="lh"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="ttl">activity log</span></div>
     <div class="body" id="logbody"><div class="empty" id="logempty">Waiting for start — completed tasks appear here.</div></div>
+  </div>
+  </div><!-- /view-deck -->
+
+  <div id="view-biz" hidden>
+    <div class="bizhead">Your businesses<span class="bizsub" id="bizsub"></span></div>
+    <div id="bizlist" class="bizlist"><div class="bizloading">Loading…</div></div>
+  </div>
+
+  <div id="view-detail" hidden>
+    <button class="backbtn" id="bizback">‹ Businesses</button>
+    <div id="bizdetail"></div>
   </div>
 </div>
 
@@ -859,6 +941,113 @@
   function cap(s){ s=String(s); return s.charAt(0).toUpperCase()+s.slice(1); }
   function pad2(n){ return n<10?"0"+n:""+n; }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  // ---------- pages / businesses ----------
+  var BIZ = null;
+  function showView(name){
+    ["deck","biz","detail"].forEach(function(v){ document.getElementById("view-"+v).hidden = (v!==name); });
+    document.querySelectorAll(".navbtn").forEach(function(b){
+      var v=b.getAttribute("data-view");
+      b.classList.toggle("on", v===name || (name==="detail" && v==="biz"));
+    });
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll(".navbtn").forEach(function(b){
+    b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); haptic("light"); showView(v); if(v==="biz") loadBusinesses(); });
+  });
+  $("#bizback").addEventListener("click", function(){ haptic("light"); showView("biz"); });
+
+  async function loadBusinesses(){
+    if (BIZ){ renderBizList(); return; }
+    var box=$("#bizlist");
+    try {
+      var r = await fetch("businesses.json", { cache:"no-store", headers: tgHeaders() });
+      if (!r.ok){ box.innerHTML='<div class="bizloading">Open inside Telegram to load your businesses.</div>'; return; }
+      BIZ = await r.json(); renderBizList();
+    } catch(e){ box.innerHTML='<div class="bizloading">Couldn’t load — open inside Telegram.</div>'; }
+  }
+  window.__loadBiz = function(data){ BIZ=data; showView("biz"); renderBizList(); };
+
+  function stageClass(s){ return s==="live"?"live":s==="building"?"building":"idea"; }
+  function renderBizList(){
+    var box=$("#bizlist"), list=(BIZ&&BIZ.businesses)||[];
+    var live=list.filter(function(b){return b.stage==="live";}).length;
+    $("#bizsub").textContent = list.length+" · "+live+" live";
+    var html="";
+    if (BIZ && BIZ.umbrella){
+      html += '<button class="bizbtn umbrella" data-biz="__umbrella"><div class="brow"><div><div class="bnm">'+esc(BIZ.umbrella.name)+'</div><div class="bgrp">Umbrella · overview</div></div><div class="chev">›</div></div>'+
+        '<div class="dsum" style="margin-top:8px;font-size:12.5px;">'+esc(BIZ.umbrella.tagline||"")+'</div></button>';
+    }
+    html += list.map(function(b){
+      return '<button class="bizbtn" data-biz="'+esc(b.id)+'"><div class="brow"><div><div class="bnm">'+esc(b.name)+'</div><div class="bgrp">'+esc(b.group||"")+'</div></div>'+
+        '<span class="stagepill '+stageClass(b.stage)+'">'+esc(b.stage||"")+'</span></div>'+
+        '<div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div>'+
+        '<div class="pmeta"><span>'+(b.progress||0)+'% to live</span><span>'+esc(b.incomePotential||"")+'</span></div></button>';
+    }).join("");
+    box.innerHTML=html;
+    box.querySelectorAll(".bizbtn").forEach(function(btn){
+      btn.addEventListener("click", function(){ haptic("light"); openBiz(btn.getAttribute("data-biz")); });
+    });
+  }
+
+  function renderFlow(flow){
+    var nodes={}, children={};
+    (flow.nodes||[]).forEach(function(n){ nodes[n.id]=n; children[n.id]=[]; });
+    (flow.edges||[]).forEach(function(e){ if(children[e[0]]) children[e[0]].push(e[1]); });
+    var roots=(flow.nodes||[]).filter(function(n){ return !(flow.edges||[]).some(function(e){return e[1]===n.id;}); });
+    function node(id,isRoot){
+      var n=nodes[id]; if(!n) return "";
+      var c=n.contact||{}, contact=[c.name,c.phone,c.whatsapp,c.handle,c.url,c.note].filter(Boolean).join(" · ");
+      var kids=(children[id]||[]).map(function(k){return node(k,false);}).join("");
+      return '<div class="fnode'+(isRoot?" root":"")+'"><div class="flabel"><span class="fkind '+(n.kind||"unit")+'">'+esc(n.kind||"unit")+'</span><span>'+esc(n.label)+'</span></div>'+
+        (contact?'<div class="fcontact">'+esc(contact)+'</div>':'')+kids+'</div>';
+    }
+    return roots.map(function(r){return node(r.id,true);}).join("");
+  }
+
+  function openUmbrella(){
+    var d=$("#bizdetail"), list=(BIZ.businesses||[]);
+    var byStage={live:0,building:0,idea:0}; list.forEach(function(b){ byStage[b.stage]=(byStage[b.stage]||0)+1; });
+    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length):0;
+    d.innerHTML=
+      '<div class="dtitle">'+esc(BIZ.umbrella.name)+'</div><div class="dgroup">Umbrella overview</div>'+
+      '<div class="dsum">'+esc(BIZ.umbrella.note||BIZ.umbrella.tagline||"")+'</div>'+
+      '<div class="dcard"><h3>Portfolio</h3><div class="inc">'+
+        '<div class="box"><div class="v">'+list.length+'</div><div class="k">businesses</div></div>'+
+        '<div class="box"><div class="v">'+byStage.live+'</div><div class="k">live</div></div>'+
+        '<div class="box"><div class="v">'+byStage.building+'</div><div class="k">building</div></div>'+
+        '<div class="box"><div class="v">'+byStage.idea+'</div><div class="k">idea</div></div></div>'+
+        '<div class="pbar big" style="margin-top:14px;"><span style="width:'+avg+'%"></span></div>'+
+        '<div class="pmeta" style="font-family:var(--mono);font-size:10px;color:var(--ink-mut);display:flex;justify-content:space-between;margin-top:6px;"><span>avg progress</span><span>'+avg+'%</span></div></div>'+
+      '<div class="dcard"><h3>All businesses</h3><div class="brk">'+
+        list.map(function(b){ return '<div class="row"><div class="top"><span>'+esc(b.name)+'</span><span class="p">'+(b.progress||0)+'%</span></div><div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div></div>'; }).join("")+'</div></div>';
+    showView("detail");
+  }
+
+  function openBiz(id){
+    if (id==="__umbrella"){ return openUmbrella(); }
+    var b=(BIZ.businesses||[]).filter(function(x){return x.id===id;})[0]; if(!b) return;
+    var linked=(b.linkedAgents||[]);
+    var enableBtn = linked.length ? '<button class="enablebtn" id="bizenable">▶ Enable this business’s bot ('+esc(linked.join(", "))+')</button>' : '<div class="fcontact">No bot linked yet — add one from the Deck (+ New agent), then link it here.</div>';
+    $("#bizdetail").innerHTML=
+      '<div class="dtitle">'+esc(b.name)+'</div><div class="dgroup">'+esc(b.group||"")+' · '+esc(b.stage||"")+'</div>'+
+      '<div class="dsum">'+esc(b.summary||"")+'</div>'+
+      '<div class="dcard"><h3>Progress to live</h3><div class="bigprog"><span class="pct">'+(b.progress||0)+'%</span><span class="plbl">'+(b.stage==="live"?"live — now optimise":"until live &amp; earning")+'</span></div><div class="pbar big"><span style="width:'+(b.progress||0)+'%"></span></div></div>'+
+      '<div class="dcard"><h3>Income</h3><div class="inc"><div class="box"><div class="v">'+esc(b.incomeRecent||"£0")+'</div><div class="k">recent</div></div><div class="box"><div class="v">'+esc(b.incomePotential||"—")+'</div><div class="k">potential</div></div></div></div>'+
+      (b.breakdown&&b.breakdown.length?'<div class="dcard"><h3>Plans &amp; execution</h3><div class="brk">'+b.breakdown.map(function(x){return '<div class="row"><div class="top"><span>'+esc(x.label)+'</span><span class="p">'+(x.pct||0)+'%</span></div><div class="pbar"><span style="width:'+(x.pct||0)+'%"></span></div></div>';}).join("")+'</div></div>':'')+
+      (b.toLive&&b.toLive.length?'<div class="dcard"><h3>'+(b.stage==="live"?"To start earning":"What’s left to go live")+'</h3><ul class="checks">'+b.toLive.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul></div>':'')+
+      (b.nextActions&&b.nextActions.length?'<div class="dcard"><h3>Your next actions</h3><ul class="checks next">'+b.nextActions.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul></div>':'')+
+      '<div class="dcard"><h3>Controls</h3>'+enableBtn+((b.shortcuts&&b.shortcuts.length)?'<div class="dbtns" style="margin-top:10px;">'+b.shortcuts.map(function(s){return s.href?'<a class="chipbtn" href="'+esc(s.href)+'" target="_blank" rel="noopener">'+esc(s.label)+'</a>':'<span class="chipbtn" style="opacity:.6;">'+esc(s.label)+'</span>';}).join("")+'</div>':'')+'</div>'+
+      (b.flow?'<div class="dcard"><h3>Operational flow — reach / fix any part</h3>'+renderFlow(b.flow)+'</div>':'');
+    var eb=$("#bizenable");
+    if (eb) eb.addEventListener("click", async function(){
+      eb.textContent="Enabling…"; haptic("medium");
+      for (var i=0;i<linked.length;i++){ await apiPost("/api/agent",{ id:linked[i], enabled:true }); }
+      eb.classList.add("on"); eb.textContent="✓ Bot enabled — Atom will work it";
+      setTimeout(loadLive, 1500);
+    });
+    showView("detail");
+  }
 
   document.getElementById("ovrobot").innerHTML = robot("overseer");
   buildChips();

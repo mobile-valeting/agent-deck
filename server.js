@@ -81,6 +81,13 @@ const server = http.createServer(async (req, res) => {
     catch { return sendJSON(res, 404, { error: 'no dashboard.json yet — waiting for first tick' }); }
   }
 
+  if (p === '/businesses.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    try { const d = fs.readFileSync(path.join(ATOM, 'state', 'businesses.json'), 'utf8');
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(d); }
+    catch { return sendJSON(res, 404, { error: 'no businesses.json' }); }
+  }
+
   if (p === '/api/command' && req.method === 'POST') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
     let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
