@@ -8,7 +8,7 @@ SOCK=/home/tris/.tailscale/tailscaled.sock
 # 1. userspace tailscaled
 pgrep -f "tailscaled --tun=userspace-networking" >/dev/null 2>&1 || \
   nohup tailscaled --tun=userspace-networking \
-    --state=/home/tris/.tailscale/tailscaled.state \
+    --statedir=/home/tris/.tailscale \
     --socket="$SOCK" >/tmp/tailscaled.log 2>&1 &
 
 # 2. app server (Telegram-auth API + dashboard) on localhost
