@@ -145,7 +145,7 @@
   .core.on .powerbtn .core-state { color: var(--good); }
   .core.on .lbl.top { color: var(--good); }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse, .approvals .apphead .warndot { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .core.on .powerbtn::before { animation: none; opacity:.9; } .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse, .approvals .apphead .warndot, .microcard.running .mdot { animation: none; } }
   .core .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
   .core .sub b { color: var(--ink); }
 
@@ -257,6 +257,23 @@
   .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .switch.on { background: var(--good-sft); border-color: var(--good-sft); }
   .switch.on .knob { transform: translateX(19px); background: var(--good); }
+
+  /* Neuron — head-brain manager (cyan, sits above Overseer) */
+  .mgr.neuron .strip { background: var(--accent); }
+  .mgr.neuron .ovface { box-shadow: 0 0 0 1px rgba(44,199,220,.4), 0 0 18px rgba(44,199,220,.14); }
+  .mgr.neuron .ovface .badge { background: var(--accent); color: #04222a; }
+  .mgr.neuron.active .ovstate .pulse { background: var(--accent); }
+
+  /* micro bots — passive automations */
+  .microgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .microcard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); }
+  .microcard .mtop { display: flex; align-items: center; gap: 8px; }
+  .microcard .mdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-mut); flex: 0 0 auto; }
+  .microcard.running .mdot { background: var(--good); animation: ping 2s ease-out infinite; }
+  .microcard .mname { font-size: 13px; font-weight: 640; }
+  .microcard .mstatus { margin-left: auto; font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-mut); }
+  .microcard.running .mstatus { color: var(--good); }
+  .microcard .mnote { font-family: var(--mono); font-size: 10px; color: var(--ink-mut); line-height: 1.35; margin-top: 7px; }
 
   /* manager log rows read as gold */
   .logrow.mgr .ok { color: var(--warn); }
@@ -439,7 +456,22 @@
     </div>
   </div>
 
-  <div class="sec"><h2>Management</h2><span class="seclabel">HIGHER MODEL · OVERNIGHT</span></div>
+  <div class="sec"><h2>Managers</h2><span class="seclabel">HEAD BRAIN · OVERSIGHT</span></div>
+  <div class="card mgr neuron" id="neuroncard">
+    <div class="strip"></div>
+    <div class="in">
+      <div class="row1">
+        <div class="ovface"><span id="neuronrobot"></span><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l1.6 1.6M17.4 17.4L19 19M19 5l-1.6 1.6M6.6 17.4L5 19"/></svg></span></div>
+        <div class="mid">
+          <div class="nm">Neuron <span class="mdl opus" id="neuronmodel">Opus</span></div>
+          <div class="desc">Head brain of every process — watches all bots, double-checks work, and promotes a struggling bot to a bigger model just for that task, then puts it back. Keeps structure &amp; productivity.</div>
+        </div>
+        <div class="switch on" id="neurontgl" role="switch" aria-checked="true" aria-label="Toggle Neuron" tabindex="0"><span class="knob"></span></div>
+      </div>
+      <div class="mstats"><span><b id="nwatch">0</b>watching</span><span><b id="nchk">0</b>checked</span><span><b id="npro">0</b>promoted</span></div>
+      <div class="ovstate" id="neuronstate"><span class="pulse"></span><span id="neuronstatetxt">Overseeing all bots</span></div>
+    </div>
+  </div>
   <div class="card mgr" id="mgrcard">
     <div class="strip"></div>
     <div class="in">
@@ -457,8 +489,11 @@
     </div>
   </div>
 
-  <div class="sec"><h2>Agents</h2><button class="addbtn" id="addtop">+ New agent</button></div>
+  <div class="sec"><h2>Workers</h2><button class="addbtn" id="addtop">+ New worker</button></div>
   <div class="agrid" id="agrid"></div>
+
+  <div class="sec" id="microsechead" hidden><h2>Micro bots</h2><span class="seclabel">PASSIVE · DETERMINISTIC</span></div>
+  <div class="microgrid" id="microgrid" hidden></div>
 
   <div class="log">
     <div class="lh"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="ttl">activity log</span></div>
@@ -588,7 +623,7 @@
     });
     var add = document.createElement("div");
     add.className = "agent add";
-    add.innerHTML = '<div class="plus">+</div><div class="txt">Add agent</div>';
+    add.innerHTML = '<div class="plus">+</div><div class="txt">Add worker</div>';
     add.addEventListener("click", function(){ haptic("light"); openAdd(); });
     grid.appendChild(add);
   }
@@ -734,6 +769,31 @@
   $("#ovtgl").addEventListener("click", toggleOverseer);
   $("#ovtgl").addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleOverseer(); } });
 
+  // ---------- Neuron (head brain) ----------
+  var neuronOn = true;
+  try { var _ns = localStorage.getItem("agentdeck.neuron"); if (_ns!==null) neuronOn = _ns==="1"; } catch(e){}
+  function renderNeuron(){
+    $("#neurontgl").classList.toggle("on", neuronOn);
+    $("#neurontgl").setAttribute("aria-checked", neuronOn?"true":"false");
+    $("#neuroncard").classList.toggle("active", neuronOn);
+    $("#neuronstatetxt").textContent = neuronOn ? "Overseeing all bots · promotes on demand" : "Off — no oversight";
+  }
+  function toggleNeuron(){ neuronOn=!neuronOn; try{ localStorage.setItem("agentdeck.neuron", neuronOn?"1":"0"); }catch(e){} haptic("medium"); renderNeuron(); }
+  $("#neurontgl").addEventListener("click", toggleNeuron);
+  $("#neurontgl").addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); toggleNeuron(); } });
+
+  // ---------- micro bots ----------
+  function renderMicrobots(list){
+    list = list || [];
+    var head=$("#microsechead"), grid=$("#microgrid");
+    if (!list.length){ head.hidden=true; grid.hidden=true; grid.innerHTML=""; return; }
+    head.hidden=false; grid.hidden=false;
+    grid.innerHTML = list.map(function(m){
+      var run = m.status==="running";
+      return '<div class="microcard'+(run?" running":"")+'"><div class="mtop"><span class="mdot"></span><span class="mname">'+esc(m.name)+'</span><span class="mstatus">'+esc(m.status||"idle")+'</span></div><div class="mnote">'+esc(m.note||"")+'</div></div>';
+    }).join("");
+  }
+
   // ---------- LIVE mode: mirror the real Atom via data.json ----------
   var LIVE = false;
   function fmtClock(iso){ if(!iso) return "--:--"; var d=new Date(iso); return isNaN(d)? "--:--" : pad2(d.getHours())+":"+pad2(d.getMinutes()); }
@@ -770,6 +830,9 @@
     $("#mgrcard").classList.toggle("active", state.power);
     var _mm = d.managerModel || "fable", _ovm = $("#ovmodel");
     if (_ovm){ _ovm.className = "mdl " + _mm; _ovm.textContent = cap(_mm); }
+    if (d.neuronModel){ var _nm=$("#neuronmodel"); _nm.className="mdl "+d.neuronModel; _nm.textContent=cap(d.neuronModel); }
+    $("#nwatch").textContent = state.agents.filter(function(a){ return a.enabled; }).length;
+    renderMicrobots(d.microbots);
 
     renderApprovals(d.approvals);
 
@@ -1053,6 +1116,8 @@
   }
 
   document.getElementById("ovrobot").innerHTML = robot("overseer");
+  document.getElementById("neuronrobot").innerHTML = robot("neuron");
+  renderNeuron();
   buildChips();
   renderAgents(); renderCore(); renderTokens(); renderGraph(); renderMgr();
   if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
