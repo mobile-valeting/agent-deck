@@ -224,6 +224,7 @@
   .mdl.haiku  { color: var(--ink-mut); background: var(--surface-3); }
   .mdl.sonnet { color: var(--accent); background: var(--accent-sft); }
   .mdl.opus   { color: var(--warn); background: rgba(251,191,36,.14); border-color: rgba(251,191,36,.24); }
+  .mdl.fable  { color: var(--warn); background: rgba(251,191,36,.14); border-color: rgba(251,191,36,.24); }
   .agent .foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 
   /* management (Overseer) card — senior treatment */
@@ -445,7 +446,7 @@
       <div class="row1">
         <div class="ovface"><span id="ovrobot"></span><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span></div>
         <div class="mid">
-          <div class="nm">Overseer <span class="mdl opus">Opus</span></div>
+          <div class="nm">Overseer <span class="mdl fable" id="ovmodel">Fable-5</span></div>
           <div class="desc">Audits every system you control and fixes what's broken on its own — no prompt. Promotes a worker to a bigger model when it falls behind.</div>
         </div>
         <div class="switch" id="ovtgl" role="switch" aria-checked="false" aria-label="Toggle Overseer" tabindex="0"><span class="knob"></span></div>
@@ -767,6 +768,8 @@
       ? "Autonomous — Atom live · worker model " + (d.workerModel || "opus")
       : "Paused — " + (d.reason || "resume from the core or Telegram");
     $("#mgrcard").classList.toggle("active", state.power);
+    var _mm = d.managerModel || "fable", _ovm = $("#ovmodel");
+    if (_ovm){ _ovm.className = "mdl " + _mm; _ovm.textContent = cap(_mm); }
 
     renderApprovals(d.approvals);
 
