@@ -392,6 +392,11 @@
   .fkind.unit { background: var(--surface-3); color: var(--ink-mut); }
   .fkind.contractor { background: var(--accent-sft); color: var(--accent); }
   .fkind.channel { background: rgba(251,191,36,.14); color: var(--warn); }
+  .fkind.division { background: var(--accent-sft); color: var(--accent); }
+  .fkind.business { background: var(--good-sft); color: var(--good); }
+  .fnode.kind-division > .flabel span:last-child { font-size: 13.5px; font-weight: 700; }
+  .fnode.kind-business > .flabel span:last-child { font-size: 12.5px; font-weight: 650; color: var(--accent); }
+  .gflow { margin-top: 2px; }
   .fcontact { font-size: 10.5px; color: var(--ink-mut); margin-top: 3px; line-height: 1.35; }
 </style>
 </head>
@@ -1072,10 +1077,35 @@
       var n=nodes[id]; if(!n) return "";
       var c=n.contact||{}, contact=[c.name,c.phone,c.whatsapp,c.handle,c.url,c.note].filter(Boolean).join(" · ");
       var kids=(children[id]||[]).map(function(k){return node(k,false);}).join("");
-      return '<div class="fnode'+(isRoot?" root":"")+'"><div class="flabel"><span class="fkind '+(n.kind||"unit")+'">'+esc(n.kind||"unit")+'</span><span>'+esc(n.label)+'</span></div>'+
+      return '<div class="fnode kind-'+(n.kind||"unit")+(isRoot?" root":"")+'"><div class="flabel"><span class="fkind '+(n.kind||"unit")+'">'+esc(n.kind||"unit")+'</span><span>'+esc(n.label)+'</span></div>'+
         (contact?'<div class="fcontact">'+esc(contact)+'</div>':'')+kids+'</div>';
     }
     return roots.map(function(r){return node(r.id,true);}).join("");
+  }
+
+  // compose the whole Atom Group into one flow tree (umbrella → divisions → businesses → their flows)
+  function divisionOf(b){
+    var g = b.group || "";
+    if (/contract|commercial/i.test(g)) return { id:"div-commercial", label:"Contract / Commercial" };
+    if (/domestic/i.test(g)) return { id:"div-domestic", label:"Domestic Services (GMB)" };
+    return { id:"div-digital", label:"Digital / Products" };
+  }
+  function buildGroupFlow(list){
+    var nodes=[{ id:"atom-group", kind:"unit", label:"Atom Group" }], edges=[], seen={};
+    list.forEach(function(b){
+      var dv=divisionOf(b);
+      if (!seen[dv.id]){ seen[dv.id]=true; nodes.push({ id:dv.id, kind:"division", label:dv.label }); edges.push(["atom-group", dv.id]); }
+      var f=b.flow||{nodes:[],edges:[]}, pfx=b.id+"__";
+      var hasIn={}; (f.edges||[]).forEach(function(e){ hasIn[e[1]]=true; });
+      (f.nodes||[]).forEach(function(n){
+        var isRoot=!hasIn[n.id];
+        nodes.push({ id:pfx+n.id, kind: isRoot?"business":(n.kind||"unit"),
+          label: isRoot ? (b.name + (b.stage?" · "+b.stage:"")) : n.label, contact:n.contact });
+      });
+      (f.edges||[]).forEach(function(e){ edges.push([pfx+e[0], pfx+e[1]]); });
+      (f.nodes||[]).forEach(function(n){ if (!hasIn[n.id]) edges.push([dv.id, pfx+n.id]); });
+    });
+    return { nodes:nodes, edges:edges };
   }
 
   function openUmbrella(){
@@ -1093,7 +1123,8 @@
         '<div class="pbar big" style="margin-top:14px;"><span style="width:'+avg+'%"></span></div>'+
         '<div class="pmeta" style="font-family:var(--mono);font-size:10px;color:var(--ink-mut);display:flex;justify-content:space-between;margin-top:6px;"><span>avg progress</span><span>'+avg+'%</span></div></div>'+
       '<div class="dcard"><h3>All businesses</h3><div class="brk">'+
-        list.map(function(b){ return '<div class="row"><div class="top"><span>'+esc(b.name)+'</span><span class="p">'+(b.progress||0)+'%</span></div><div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div></div>'; }).join("")+'</div></div>';
+        list.map(function(b){ return '<div class="row"><div class="top"><span>'+esc(b.name)+'</span><span class="p">'+(b.progress||0)+'%</span></div><div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div></div>'; }).join("")+'</div></div>'+
+      '<div class="dcard"><h3>Full workflow — every business</h3><div class="flow gflow">'+renderFlow(buildGroupFlow(list))+'</div></div>';
     showView("detail");
   }
 
