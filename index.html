@@ -284,7 +284,12 @@
   .microcard::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--steel); opacity: .5; }
   .microcard .mtop { display: flex; align-items: center; gap: 9px; }
   .microcard .mdot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-mut); flex: 0 0 auto; }
-  .microcard.running .mdot { background: var(--good); animation: ping 2s ease-out infinite; }
+  .microcard.st-running .mdot { background: var(--good); animation: ping 2s ease-out infinite; }
+  .microcard.st-scheduled .mdot { background: var(--steel); }
+  .microcard.st-stale .mdot { background: var(--warn); }
+  .microcard.st-down .mdot, .microcard.st-missing .mdot { background: var(--danger); }
+  .microcard.problem { border-color: rgba(255,93,108,.4); }
+  .microcard.problem::before { background: var(--danger); opacity: 1; }
   .microcard .mname { font-size: 13.5px; font-weight: 680; letter-spacing: -.1px; }
   .microcard .msched { margin-left: auto; font-family: var(--mono); font-size: 8.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--steel); background: var(--steel-sft); border: 1px solid rgba(127,178,255,.22); padding: 2.5px 7px; border-radius: 6px; white-space: nowrap; }
   .microcard .mnote { font-family: var(--mono); font-size: 10px; color: var(--ink-2); line-height: 1.45; margin-top: 7px; }
@@ -445,7 +450,7 @@
   @media (prefers-reduced-motion: reduce) {
     .core.on .powerbtn::before { animation: none; opacity: 1; }
     .statepill.live .dot, .agent.act .st .d, .mgr.active .ovstate .pulse,
-    .approvals .apphead .warndot, .microcard.running .mdot, .log .lh .d.g { animation: none; }
+    .approvals .apphead .warndot, .microcard.st-running .mdot, .log .lh .d.g { animation: none; }
     .logrow { animation: none; }
   }
 
@@ -854,11 +859,13 @@
     if (!list.length){ head.hidden=true; grid.hidden=true; grid.innerHTML=""; return; }
     head.hidden=false; grid.hidden=false;
     grid.innerHTML = list.map(function(m){
-      var run = m.status==="running";
-      return '<div class="microcard'+(run?" running":"")+(m.flag?" flagged":"")+'">'+
+      var s = m.status || "idle";
+      var problem = (s==="down" || s==="missing" || s==="stale");
+      return '<div class="microcard st-'+s+(m.flag?" flagged":"")+(problem?" problem":"")+'">'+
         '<div class="mtop"><span class="mdot"></span><span class="mname">'+esc(m.name)+'</span>'+(m.schedule?'<span class="msched">'+esc(m.schedule)+'</span>':'')+'</div>'+
         '<div class="mnote">'+esc(m.note||"")+'</div>'+
         (m.connects?'<div class="mconn">→ '+esc(m.connects)+'</div>':'')+
+        (problem?'<div class="mflag">⚠ '+esc(s.toUpperCase())+' — not responding</div>':'')+
         (m.flag?'<div class="mflag">⚠ '+esc(m.flag)+'</div>':'')+
         '</div>';
     }).join("");
