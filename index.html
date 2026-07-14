@@ -409,23 +409,37 @@
   .enablebtn { width: 100%; padding: 13px; border-radius: var(--r-ctl); border: 1px solid rgba(52,224,140,.3); background: var(--good-sft); color: var(--good); font-family: var(--sans); font-weight: 680; font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .enablebtn.on { background: var(--bg2); color: var(--ink-mut); border-color: var(--border); }
 
-  /* ---- flow tree ---- */
-  .flow { font-family: var(--mono); font-size: 11.5px; }
-  .fnode { padding: 7px 0 0 14px; border-left: 1px solid var(--border-2); margin-left: 9px; position: relative; }
-  .fnode::before { content: ""; position: absolute; left: -1px; top: 15px; width: 11px; height: 1px; background: var(--border-2); }
-  .fnode.root { border-left: none; margin-left: 0; padding-left: 0; }
-  .fnode.root::before { display: none; }
-  .flabel { display: flex; align-items: center; gap: 7px; }
-  .fkind { font-size: 7.5px; text-transform: uppercase; letter-spacing: .6px; padding: 1.5px 6px; border-radius: 5px; flex: 0 0 auto; font-weight: 800; }
-  .fkind.unit { background: var(--bg3); color: var(--ink-mut); }
-  .fkind.contractor { background: var(--good-sft); color: var(--good); }
-  .fkind.channel { background: var(--warn-sft); color: var(--warn); }
-  .fkind.division { background: var(--accent-sft); color: var(--accent); }
-  .fkind.business { background: var(--steel-sft); color: var(--steel); }
-  .fnode.kind-division > .flabel span:last-child { font-size: 13px; font-weight: 750; color: var(--ink); }
-  .fnode.kind-business > .flabel span:last-child { font-size: 12px; font-weight: 700; color: var(--accent); }
-  .fcontact { font-size: 10px; color: var(--ink-mut); margin-top: 3px; line-height: 1.4; }
-  .gflow { margin-top: 2px; }
+  /* ---- flow: top-down org tree (pyramid, branches down) ---- */
+  .flow { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px 0 12px; }
+  .flow::-webkit-scrollbar { height: 5px; } .flow::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+  .tree { display: inline-block; min-width: 100%; }
+  .tree ul { display: flex; justify-content: center; padding: 22px 0 0; margin: 0; position: relative; list-style: none; }
+  .tree li { list-style: none; position: relative; padding: 22px 7px 0; text-align: center; }
+  /* connectors */
+  .tree li::before, .tree li::after { content: ""; position: absolute; top: 0; width: 50%; height: 22px; border-top: 1.5px solid var(--border-2); }
+  .tree li::before { right: 50%; }
+  .tree li::after  { left: 50%; border-left: 1.5px solid var(--border-2); }
+  .tree li:only-child::before, .tree li:only-child::after { display: none; }
+  .tree li:only-child { padding-top: 14px; }
+  .tree li:first-child::before, .tree li:last-child::after { border: 0; }
+  .tree li:last-child::before { border-right: 1.5px solid var(--border-2); border-radius: 0 8px 0 0; }
+  .tree li:first-child::after { border-radius: 8px 0 0 0; }
+  .tree ul ul::before { content: ""; position: absolute; top: 0; left: 50%; width: 0; height: 22px; border-left: 1.5px solid var(--border-2); }
+  /* node boxes */
+  .tnode { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; vertical-align: top;
+    min-width: 82px; max-width: 150px; padding: 9px 12px; border-radius: 13px;
+    background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 60%), var(--bg2);
+    border: 1px solid var(--border-2); box-shadow: 0 5px 14px rgba(0,0,0,.4); }
+  .tnode .tlabel { font-family: var(--sans); font-size: 12px; font-weight: 650; color: var(--ink); line-height: 1.25; letter-spacing: -.1px; }
+  .tnode .tcontact { font-family: var(--mono); font-size: 8.5px; color: var(--ink-mut); line-height: 1.3; margin-top: 1px; }
+  .tnode.kind-division { border-color: rgba(46,230,255,.45); background: linear-gradient(180deg, rgba(46,230,255,.13), transparent 60%), var(--bg2); }
+  .tnode.kind-division .tlabel { color: var(--accent); font-weight: 730; }
+  .tnode.kind-business { border-color: rgba(127,178,255,.45); }
+  .tnode.kind-business .tlabel { color: var(--steel); font-weight: 720; }
+  .tnode.kind-contractor { border-color: rgba(52,224,140,.4); }
+  .tnode.kind-channel { border-color: rgba(255,194,71,.4); }
+  .tree > ul > li > .tnode { border-color: var(--accent); background: linear-gradient(180deg, rgba(46,230,255,.2), transparent 65%), var(--bg3); box-shadow: 0 0 22px rgba(46,230,255,.16); }
+  .tree > ul > li > .tnode .tlabel { font-size: 14px; font-weight: 780; color: var(--ink); }
 
   /* ---- motion discipline ---- */
   @media (prefers-reduced-motion: reduce) {
@@ -1117,14 +1131,17 @@
     (flow.nodes||[]).forEach(function(n){ nodes[n.id]=n; children[n.id]=[]; });
     (flow.edges||[]).forEach(function(e){ if(children[e[0]]) children[e[0]].push(e[1]); });
     var roots=(flow.nodes||[]).filter(function(n){ return !(flow.edges||[]).some(function(e){return e[1]===n.id;}); });
-    function node(id,isRoot){
-      var n=nodes[id]; if(!n) return "";
+    function box(n){
       var c=n.contact||{}, contact=[c.name,c.phone,c.whatsapp,c.handle,c.url,c.note].filter(Boolean).join(" · ");
-      var kids=(children[id]||[]).map(function(k){return node(k,false);}).join("");
-      return '<div class="fnode kind-'+(n.kind||"unit")+(isRoot?" root":"")+'"><div class="flabel"><span class="fkind '+(n.kind||"unit")+'">'+esc(n.kind||"unit")+'</span><span>'+esc(n.label)+'</span></div>'+
-        (contact?'<div class="fcontact">'+esc(contact)+'</div>':'')+kids+'</div>';
+      return '<div class="tnode kind-'+(n.kind||"unit")+'"><div class="tlabel">'+esc(n.label)+'</div>'+
+        (contact?'<div class="tcontact">'+esc(contact)+'</div>':'')+'</div>';
     }
-    return roots.map(function(r){return node(r.id,true);}).join("");
+    function li(id){
+      var n=nodes[id]; if(!n) return "";
+      var kids=children[id]||[];
+      return '<li>'+box(n)+(kids.length?'<ul>'+kids.map(li).join("")+'</ul>':'')+'</li>';
+    }
+    return '<div class="flow"><div class="tree"><ul>'+roots.map(function(r){return li(r.id);}).join("")+'</ul></div></div>';
   }
 
   // compose the whole Atom Group into one flow tree (umbrella → divisions → businesses → their flows)
@@ -1168,7 +1185,7 @@
         '<div class="pmeta" style="font-family:var(--mono);font-size:10px;color:var(--ink-mut);display:flex;justify-content:space-between;margin-top:6px;"><span>avg progress</span><span>'+avg+'%</span></div></div>'+
       '<div class="dcard"><h3>All businesses</h3><div class="brk">'+
         list.map(function(b){ return '<div class="row"><div class="top"><span>'+esc(b.name)+'</span><span class="p">'+(b.progress||0)+'%</span></div><div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div></div>'; }).join("")+'</div></div>'+
-      '<div class="dcard"><h3>Full workflow — every business</h3><div class="flow gflow">'+renderFlow(buildGroupFlow(list))+'</div></div>';
+      '<div class="dcard"><h3>Full workflow — every business</h3>'+renderFlow(buildGroupFlow(list))+'</div>';
     showView("detail");
   }
 
