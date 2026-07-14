@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f1113">
-<title>Agent Deck</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='88'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#05070e">
+<title>Atom · Agent Deck</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='88'%3E%E2%9A%9B%3C/text%3E%3C/svg%3E">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   /* ============================================================
@@ -455,15 +455,177 @@
   }
 
 </style>
+
+<style>
+/* ===== Atom HUD skin: deep vignette + glass + blue-glow + blood red ===== */
+:root{
+  --bg0:#05070e;
+  --bg-grad:radial-gradient(135% 90% at 50% -8%, #0d1326 0%, #080b16 42%, #04050b 78%, #020306 100%);
+  --accent:#4fe9ff; --accent-2:#8ff2ff; --accent-deep:#1c9fc0; --accent-sft:rgba(79,233,255,.12);
+  --glow:0 0 20px rgba(79,233,255,.4);
+  --danger:#cf1626; --danger-sft:rgba(207,22,38,.14);
+  --border:rgba(120,200,255,.10); --border-2:rgba(120,200,255,.20);
+  --graph:#4fe9ff; --graph-a:rgba(79,233,255,.26); --graph-b:rgba(79,233,255,.02);
+}
+body{ background:var(--bg0); background-image:var(--bg-grad); background-attachment:fixed; }
+body::before,body::after{ content:""; position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; opacity:.55; }
+body::before{ width:60vw; height:60vw; max-width:340px; max-height:340px; top:-8vh; left:-12vw; background:radial-gradient(circle,rgba(79,233,255,.16),transparent 66%); }
+body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:-4vh; right:-14vw; background:radial-gradient(circle,rgba(46,120,220,.13),transparent 66%); }
+.wrap{ position:relative; z-index:1; }
+/* ===== PREMIUM RESTRAINT — flow over boxes, hairlines not glowing outlines ===== */
+.wrap{ gap:22px !important; }
+/* de-box: the core, command and chart breathe directly on the canvas */
+.core, .cmd, [class="card"]{ background:transparent !important; border:none !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+.cmd{ padding:0 2px !important; }
+[class="card"]{ padding:0 2px !important; }
+.core{ padding:4px 0 0 !important; }
+/* kept surfaces — quiet, hairline, soft depth, NO coloured glow */
+.mgr,.agent,.microcard,.log,.bizbtn,.dcard,.inc .box,.stat{
+  background:rgba(255,255,255,.022) !important;
+  -webkit-backdrop-filter:blur(12px) saturate(120%); backdrop-filter:blur(12px) saturate(120%);
+  border:1px solid rgba(255,255,255,.06) !important; border-radius:16px !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.25), 0 10px 28px rgba(0,0,0,.32) !important;
+}
+.agent.add{ background:transparent !important; border:1px dashed rgba(255,255,255,.12) !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+.approvals{ background:rgba(255,194,71,.05) !important; border:1px solid rgba(255,194,71,.2) !important; border-radius:16px !important; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); box-shadow:0 1px 2px rgba(0,0,0,.25), 0 10px 28px rgba(0,0,0,.3) !important; }
+.mgr{ border-color:rgba(255,255,255,.07) !important; }
+.mgr.neuron{ border-color:rgba(79,233,255,.2) !important; }
+.microcard.problem{ border-color:rgba(255,93,108,.32) !important; }
+.log{ background:rgba(6,10,16,.5) !important; }
+.bizbtn.umbrella{ background:linear-gradient(180deg,rgba(79,233,255,.07),transparent 55%), rgba(255,255,255,.022) !important; border-color:rgba(79,233,255,.26) !important; }
+.tnode{ background:rgba(255,255,255,.03) !important; border-color:rgba(255,255,255,.09) !important; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); box-shadow:0 6px 16px rgba(0,0,0,.4) !important; }
+.brand .mk{ background:transparent !important; border:none !important; box-shadow:none !important; }
+.nav{ background:rgba(8,11,18,.8) !important; border-top:1px solid rgba(255,255,255,.06) !important; }
+/* more air above section headers */
+.sec{ padding:12px 4px 0 !important; }
+
+/* ===== BUSINESSES — premium portfolio view ===== */
+.bizhead{ font-size:26px !important; font-weight:780 !important; }
+.phero{ display:block; width:100%; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; position:relative; overflow:hidden; color:var(--ink);
+  background:linear-gradient(158deg, rgba(79,233,255,.11), rgba(79,233,255,.02) 52%, transparent), rgba(255,255,255,.022);
+  border:1px solid rgba(79,233,255,.3); border-radius:20px; padding:19px 19px 15px;
+  box-shadow:0 1px 2px rgba(0,0,0,.3), 0 18px 44px rgba(0,0,0,.42); }
+.phero:active{ transform:scale(.995); }
+.phero::after{ content:""; position:absolute; right:-34px; top:-40px; width:150px; height:150px; border-radius:50%; background:radial-gradient(circle, rgba(79,233,255,.2), transparent 70%); pointer-events:none; }
+.phero .pk{ font-family:var(--mono); font-size:9.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--accent); }
+.phero .pbig{ font-family:var(--mono); font-size:40px; font-weight:780; letter-spacing:-1.4px; margin-top:7px; line-height:1;
+  background:linear-gradient(96deg,#eafcff,var(--accent) 60%,#33c6e0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.phero .pu{ font-size:.32em; -webkit-text-fill-color:var(--ink-mut); color:var(--ink-mut); font-weight:600; margin-left:7px; letter-spacing:0; }
+.phero .parrow{ font-family:var(--mono); font-size:11.5px; color:var(--good); margin-top:7px; letter-spacing:.3px; }
+.phero .pstats{ display:flex; gap:22px; margin-top:15px; }
+.phero .pstats > div{ font-family:var(--mono); font-size:8.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink-mut); }
+.phero .pstats b{ display:block; font-size:18px; color:var(--ink); letter-spacing:-.3px; font-weight:750; margin-bottom:1px; }
+.phero .pstats b.g{ color:var(--good); }
+.phero .popen{ font-family:var(--mono); font-size:10px; color:var(--accent); margin-top:15px; padding-top:13px; border-top:1px solid rgba(255,255,255,.08); }
+.bizdiv{ font-family:var(--mono); font-size:9.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--ink-mut); margin:20px 2px 0; display:flex; align-items:center; gap:10px; }
+.bizdiv::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(255,255,255,.11), transparent); }
+.bizcard{ display:block; width:100%; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; color:var(--ink);
+  background:rgba(255,255,255,.022); border:1px solid rgba(255,255,255,.065); border-radius:15px; padding:14px 15px;
+  box-shadow:0 1px 2px rgba(0,0,0,.25), 0 10px 26px rgba(0,0,0,.3); transition:transform .1s ease, border-color .2s ease; }
+.bizcard:active{ transform:scale(.99); }
+.bizcard:hover{ border-color:rgba(79,233,255,.22); }
+.bcrow{ display:flex; align-items:center; gap:10px; }
+.bcname{ font-size:15px; font-weight:720; letter-spacing:-.2px; flex:1; min-width:0; }
+.bcgrp{ display:block; font-family:var(--mono); font-size:8.5px; letter-spacing:.7px; text-transform:uppercase; color:var(--faint); margin-top:3px; font-weight:400; }
+.bcinc{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-top:11px; }
+.bcfig{ display:flex; align-items:baseline; gap:8px; min-width:0; }
+.bcnow{ font-family:var(--mono); font-size:15px; font-weight:720; color:var(--ink); letter-spacing:-.2px; }
+.bcto{ font-family:var(--mono); font-size:10.5px; color:var(--ink-mut); }
+.bcchart{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex:0 0 auto; }
+.bspark{ width:72px; height:24px; }
+.bspark path{ fill:none; stroke-width:2; vector-effect:non-scaling-stroke; }
+.bspark.up path{ stroke:var(--good); filter:drop-shadow(0 0 4px rgba(55,242,176,.5)); }
+.bspark.down path{ stroke:#ff5566; filter:drop-shadow(0 0 4px rgba(207,22,38,.45)); }
+.bclabel{ font-family:var(--mono); font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink-mut); }
+.bcmeta{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:9.5px; color:var(--ink-mut); margin-top:9px; letter-spacing:.3px; }
+.bcgo{ color:var(--accent); }
+.bigchart{ width:100%; height:78px; overflow:visible; display:block; margin-top:2px; }
+
+/* ===== group-status bar (deck, money-first) ===== */
+.gstat{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:2px 2px 2px; }
+.gsmain{ min-width:0; }
+.gsk{ display:block; font-family:var(--mono); font-size:9px; letter-spacing:1.6px; text-transform:uppercase; color:var(--ink-mut); }
+.gsv{ font-family:var(--mono); font-size:31px; font-weight:770; letter-spacing:-1.2px; line-height:1.05; display:inline-block; margin-top:3px;
+  background:linear-gradient(96deg,#eafcff,var(--accent) 60%,#33c6e0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.gsu{ font-size:.38em; -webkit-text-fill-color:var(--ink-mut); color:var(--ink-mut); margin-left:3px; letter-spacing:0; }
+.gsp{ display:block; font-family:var(--mono); font-size:10px; color:var(--good); margin-top:4px; letter-spacing:.3px; }
+.gsstats{ display:flex; gap:16px; text-align:right; flex:0 0 auto; }
+.gsstats > div{ font-family:var(--mono); font-size:8px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink-mut); }
+.gsstats b{ display:block; font-size:16px; color:var(--ink); font-weight:730; letter-spacing:-.3px; margin-bottom:1px; }
+.gsstats b.g{ color:var(--good); }
+
+/* ===== compacted managers (one tight pair, not two big cards) ===== */
+.mgr .in{ padding:13px 15px !important; gap:10px !important; }
+.mgr .ovface{ width:42px !important; height:42px !important; border-radius:12px !important; }
+.mgr .ovface > span:first-child svg{ width:34px !important; height:34px !important; }
+.mgr .nm{ font-size:14.5px !important; }
+.mgr .desc{ display:-webkit-box !important; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; font-size:9.5px !important; margin-top:3px !important; }
+.mgr .mstats b{ font-size:14px !important; }
+.mgr + .mgr{ margin-top:-12px !important; }
+
+/* ===== "needs you" — compact alert button with a loud ! ===== */
+.needbtn{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; color:var(--ink);
+  background:rgba(255,194,71,.08); border:1px solid rgba(255,194,71,.36); border-radius:14px; padding:11px 14px;
+  box-shadow:0 0 0 1px rgba(255,194,71,.12), 0 10px 28px rgba(0,0,0,.35), 0 0 32px -12px rgba(255,194,71,.55); }
+.needbtn:active{ transform:scale(.99); }
+.needbang{ flex:0 0 auto; width:30px; height:30px; border-radius:50%; background:var(--warn); color:#2a1c00; font-weight:900; font-size:21px; line-height:1;
+  display:grid; place-items:center; box-shadow:0 0 14px rgba(255,194,71,.65); animation:ping-a 1.7s ease-out infinite; }
+.needtxt{ flex:1; display:flex; flex-direction:column; gap:1px; min-width:0; }
+.needtxt b{ font-size:14px; font-weight:750; color:var(--warn); letter-spacing:.2px; }
+.needsub{ font-family:var(--mono); font-size:9.5px; color:var(--ink-mut); letter-spacing:.3px; }
+.needchev{ flex:0 0 auto; color:var(--warn); font-size:22px; font-weight:300; line-height:1; }
+.appbtn.ok{ background:rgba(55,242,176,.12) !important; border-color:rgba(55,242,176,.35) !important; color:var(--good) !important; }
+.appbtn.no{ background:rgba(207,22,38,.1) !important; border-color:rgba(207,22,38,.4) !important; color:#ff5566 !important; }
+@media (prefers-reduced-motion:reduce){ .needbang{ animation:none; } }
+.nav{ background:rgba(6,9,16,.82) !important; }
+
+/* ON/OFF SWITCHES = RED when on (changes with state) */
+.switch.on{ background:#cf1626 !important; border-color:#cf1626 !important; box-shadow:0 0 13px rgba(207,22,38,.5) !important; }
+.agent .miniswitch.on{ background:rgba(207,22,38,.26) !important; border-color:rgba(207,22,38,.5) !important; box-shadow:0 0 11px rgba(207,22,38,.35) !important; }
+.agent .miniswitch.on .k{ background:#ff3b4e !important; }
+
+/* GRADIENT BIG READOUTS */
+.graph-head .big, .dtitle, .bigprog .pct{ background:linear-gradient(96deg,#eafcff,var(--accent) 58%,#33c6e0); -webkit-background-clip:text; background-clip:text; color:transparent !important; }
+.brand h1{ letter-spacing:.4px !important; }
+
+/* ---- swipe: horizontal snap pager for the two top views ---- */
+.wrap{ overflow-x:hidden; }
+.pager{ display:flex; overflow-x:auto; overflow-y:visible; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; scrollbar-width:none; align-items:flex-start; }
+.pager::-webkit-scrollbar{ display:none; }
+#view-deck, #view-biz{ flex:0 0 100%; min-width:100%; scroll-snap-align:center; scroll-snap-stop:always; display:flex !important; }
+
+/* ---- running / stop state = blood red (was cyan) ---- */
+.core.on .powerbtn::before{ background:conic-gradient(from 0deg, var(--danger), transparent 25%, var(--danger) 55%, transparent 78%, var(--danger)) !important; }
+.core.on .powerbtn .ring{ box-shadow:inset 0 0 0 1px rgba(207,22,38,.62), inset 0 0 26px rgba(207,22,38,.16), 0 0 30px rgba(207,22,38,.24) !important; }
+.core.on .powerbtn .glyph{ color:#ff3b4e !important; filter:drop-shadow(0 0 8px rgba(207,22,38,.75)) !important; }
+.core.on .powerbtn .core-state{ color:#ff3b4e !important; }
+.core.on .lbl.top{ color:#ff3b4e !important; text-shadow:0 0 12px rgba(207,22,38,.5) !important; }
+.statepill.live{ color:#ff5566 !important; border-color:rgba(207,22,38,.42) !important; background:rgba(207,22,38,.14) !important; box-shadow:0 0 16px rgba(207,22,38,.3) !important; }
+.statepill.live .dot{ background:#ff3b4e !important; }
+/* COMPACT power core + SCIENTIFIC ATOM logo */
+.powerbtn{ width:116px !important; height:116px !important; margin:8px 0 2px !important; }
+.powerbtn .ring{ inset:8px !important; }
+.powerbtn .glyph{ width:34px !important; height:34px !important; }
+.powerbtn .core-state{ display:none !important; }
+.core{ padding:18px 18px 16px !important; }
+.brand .mk{ background:transparent !important; border:none !important; box-shadow:none !important; overflow:visible !important; display:grid; place-items:center; }
+.atomlogo{ filter:drop-shadow(0 0 6px rgba(79,233,255,.85)); }
+.atomlogo .orbits{ transform-origin:24px 24px; animation:atomspin 9s linear infinite; }
+.atomlogo .nuc{ animation:atompulse 2.6s ease-in-out infinite; }
+@keyframes atomspin{ to{ transform:rotate(360deg); } }
+@keyframes atompulse{ 0%,100%{ opacity:.72; } 50%{ opacity:1; } }
+@media (prefers-reduced-motion:reduce){ .pager{ scroll-behavior:auto; } .atomlogo .orbits, .atomlogo .nuc{ animation:none; } }
+</style>
 </head>
 <body>
+
 <div class="wrap">
   <div class="topbar">
     <div class="brand">
       <div class="mk">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4" fill="currentColor"/><path d="M9 14h.01M15 14h.01"/></svg>
+        <svg class="atomlogo" width="30" height="30" viewBox="0 0 48 48" fill="none"><g class="orbits" stroke="#4fe9ff" stroke-width="2.2"><ellipse cx="24" cy="24" rx="21" ry="8.4"/><ellipse cx="24" cy="24" rx="21" ry="8.4" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="21" ry="8.4" transform="rotate(120 24 24)"/><circle cx="45" cy="24" r="2.6" fill="#8ff2ff"/><circle cx="13.5" cy="42.2" r="2.6" fill="#8ff2ff"/><circle cx="13.5" cy="5.8" r="2.6" fill="#8ff2ff"/></g><circle class="nuc" cx="24" cy="24" r="4.2" fill="#4fe9ff"/></svg>
       </div>
-      <div><h1>Agent Deck</h1><span id="brandsub">atom · demo</span></div>
+      <div><h1>Agent Deck</h1><span id="brandsub">Autonomous ops</span></div>
     </div>
     <div class="statepill" id="statepill"><span class="dot"></span><span id="statetxt">STANDBY</span></div>
   </div>
@@ -479,7 +641,9 @@
     </button>
   </div>
 
+  <div class="pager" id="pager">
   <div id="view-deck">
+  <div class="gstat" id="gstat"></div>
   <div class="card core" id="core">
     <div class="lbl top" id="corelbl">system standby</div>
     <button class="powerbtn" id="powerbtn" aria-label="Toggle agents">
@@ -491,10 +655,11 @@
     <div class="sub" id="coresub"><b>0</b> of <b>0</b> agents active</div>
   </div>
 
-  <div class="card approvals" id="approvals" style="display:none;">
-    <div class="apphead"><span class="warndot"></span>Needs you<span class="appcount" id="appcount"></span></div>
-    <div id="applist"></div>
-  </div>
+  <button class="needbtn" id="approvals" style="display:none;">
+    <span class="needbang">!</span>
+    <span class="needtxt"><b>Needs you</b><span class="needsub" id="appcount">0 pending</span></span>
+    <span class="needchev">›</span>
+  </button>
 
   <div class="card cmd">
     <div class="cmdrow">
@@ -574,6 +739,8 @@
     <div class="bizhead">Your businesses<span class="bizsub" id="bizsub"></span></div>
     <div id="bizlist" class="bizlist"><div class="bizloading">Loading…</div></div>
   </div>
+
+  </div><!-- /pager -->
 
   <div id="view-detail" hidden>
     <button class="backbtn" id="bizback">‹ Businesses</button>
@@ -951,32 +1118,38 @@
   }
 
   // ---------- approvals inbox ----------
+  var APPROVALS = [];
   function renderApprovals(list){
-    var wrap=$("#approvals"), box=$("#applist"); list = list || [];
-    if (!list.length){ wrap.style.display="none"; box.innerHTML=""; return; }
-    wrap.style.display=""; $("#appcount").textContent = list.length;
-    box.innerHTML = list.map(function(b){
-      return '<div class="appitem" data-id="'+esc(b.id)+'"><div class="apptxt">'+esc(b.summary)+'</div>'+
-        '<div class="appbtns"><button class="appbtn ok" data-d="approve">Approve</button>'+
-        '<button class="appbtn no" data-d="reject">Reject</button></div></div>';
-    }).join("");
-    box.querySelectorAll(".appbtn").forEach(function(btn){
+    APPROVALS = list || [];
+    var wrap=$("#approvals");
+    if (!APPROVALS.length){ wrap.style.display="none"; return; }
+    wrap.style.display="";
+    $("#appcount").textContent = APPROVALS.length + (APPROVALS.length===1?" request":" requests") + " \u00b7 tap to review";
+  }
+  function openApprovals(){
+    if(!APPROVALS.length) return; haptic("light");
+    sheet.innerHTML = '<div class="grab"></div><h3>Needs you</h3>'+
+      '<div class="hint" style="text-align:left;margin:2px 0 10px;">'+APPROVALS.length+' request'+(APPROVALS.length>1?'s':'')+' waiting on your call.</div>'+
+      APPROVALS.map(function(b){ return '<div class="appitem" data-id="'+esc(b.id)+'"><div class="apptxt">'+esc(b.summary)+'</div>'+
+        '<div class="appbtns"><button class="appbtn ok" data-d="approve">Approve</button><button class="appbtn no" data-d="reject">Reject</button></div></div>'; }).join("");
+    scrim.classList.add("show");
+    sheet.querySelectorAll(".appbtn").forEach(function(btn){
       btn.addEventListener("click", function(){ decideApproval(btn.closest(".appitem").getAttribute("data-id"), btn.getAttribute("data-d"), btn); });
     });
   }
+  document.getElementById("approvals").addEventListener("click", openApprovals);
   async function decideApproval(id, decision, btn){
     var item = btn.closest(".appitem"); item.style.opacity=".5"; haptic("medium");
     var ok = await apiPost("/api/approve", { id:id, decision:decision });
-    if (ok){
-      var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
-      var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
-      var row=document.createElement("div"); row.className="logrow mgr";
-      row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(decision==="approve"?"approved ":"rejected ")+esc(id)+'</span>';
-      body.insertBefore(row, body.firstChild);
-      item.remove();
-      if (!$("#applist").children.length) $("#approvals").style.display="none";
-      setTimeout(loadLive, 2500);
-    } else { item.style.opacity="1"; }
+    var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
+    var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
+    var row=document.createElement("div"); row.className="logrow mgr";
+    row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(decision==="approve"?"approved ":"rejected ")+esc(id)+'</span>';
+    body.insertBefore(row, body.firstChild);
+    APPROVALS = APPROVALS.filter(function(x){ return x.id!==id; });
+    item.remove(); renderApprovals(APPROVALS);
+    if (!APPROVALS.length) closeSheet();
+    if (ok) setTimeout(loadLive, 2500);
   }
 
   // ---------- per-agent enable/disable ----------
@@ -1059,6 +1232,7 @@
       '<div class="detail-head"><div class="bigface">'+robot(a.id)+'</div>' +
         '<div><h3>'+esc(a.name)+' <span class="mdl '+m+'" style="vertical-align:middle;">'+cap(m)+'</span></h3>' +
         '<div class="role2">'+(a.enabled?"Enabled":"Disabled")+(active?" · working now":a.enabled?" · idle (Atom paused)":"")+'</div></div></div>' +
+      '<div class="stats"><div class="stat"><div class="v">'+fmt(a.tokens||0)+'</div><div class="k">tokens</div></div><div class="stat"><div class="v">'+(a.tasks||0)+'</div><div class="k">tasks</div></div><div class="stat"><div class="v">'+cap(m)+'</div><div class="k">model</div></div></div>' +
       '<div class="field"><label>What this agent does</label><textarea id="abrief" placeholder="Describe its job — Atom follows this as a standing directive">'+esc(a.use||"")+'</textarea></div>' +
       '<div class="btnrow"><button class="btn primary wide" id="asave">Save brief</button></div>' +
       '<div class="btnrow">' +
@@ -1080,21 +1254,44 @@
   }
   $("#addtop").addEventListener("click", function(){ haptic("light"); openAdd(); });
 
-  function fmt(n){ return (n||0).toLocaleString("en-US"); }
+  function fmt(n){ return (n||0).toLocaleString("en-GB"); }
   function cap(s){ s=String(s); return s.charAt(0).toUpperCase()+s.slice(1); }
   function pad2(n){ return n<10?"0"+n:""+n; }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
   // ---------- pages / businesses ----------
   var BIZ = null;
-  function showView(name){
-    ["deck","biz","detail"].forEach(function(v){ document.getElementById("view-"+v).hidden = (v!==name); });
+  var DEMO_BIZ = null;
+  function setNavOn(name){
     document.querySelectorAll(".navbtn").forEach(function(b){
       var v=b.getAttribute("data-view");
       b.classList.toggle("on", v===name || (name==="detail" && v==="biz"));
     });
-    window.scrollTo(0,0);
   }
+  function showView(name){
+    var pager=document.getElementById("pager"), detail=document.getElementById("view-detail");
+    if (name==="detail"){ if(pager) pager.style.display="none"; detail.hidden=false; }
+    else {
+      detail.hidden=true;
+      if(pager){ pager.style.display="flex"; var idx=(name==="biz")?1:0;
+        try{ pager.scrollTo({left:idx*pager.clientWidth, behavior:"smooth"}); }
+        catch(e){ pager.scrollLeft=idx*pager.clientWidth; }
+      }
+    }
+    setNavOn(name); window.scrollTo(0,0);
+  }
+  (function(){
+    var pager=document.getElementById("pager"); if(!pager) return;
+    var raf; pager.addEventListener("scroll", function(){
+      if(raf) cancelAnimationFrame(raf);
+      raf=requestAnimationFrame(function(){
+        if(!document.getElementById("view-detail").hidden) return;
+        var i=Math.round(pager.scrollLeft/pager.clientWidth), name=(i>=1)?"biz":"deck";
+        setNavOn(name);
+        if(name==="biz" && !BIZ) loadBusinesses();
+      });
+    }, {passive:true});
+  })();
   document.querySelectorAll(".navbtn").forEach(function(b){
     b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); haptic("light"); showView(v); if(v==="biz") loadBusinesses(); });
   });
@@ -1107,30 +1304,69 @@
       var r = await fetch("businesses.json", { cache:"no-store", headers: tgHeaders() });
       if (!r.ok){ box.innerHTML='<div class="bizloading">Open inside Telegram to load your businesses.</div>'; return; }
       BIZ = await r.json(); renderBizList();
-    } catch(e){ box.innerHTML='<div class="bizloading">Couldn’t load — open inside Telegram.</div>'; }
+    } catch(e){ box.innerHTML='<div class="bizloading">Open inside Telegram to load your businesses.</div>'; }
   }
   window.__loadBiz = function(data){ BIZ=data; showView("biz"); renderBizList(); };
 
   function stageClass(s){ return s==="live"?"live":s==="building"?"building":"idea"; }
+  function parseMoney(s){ if(!s) return 0; var m=String(s).replace(/,/g,'').match(/([\d.]+)\s*(k|m)?/i); if(!m) return 0; var n=parseFloat(m[1])||0; var u=(m[2]||'').toLowerCase(); if(u==='k')n*=1000; if(u==='m')n*=1e6; return n; }
+  function money(n){ if(n>=1000){ var v=n/1000; return '£'+(v%1?v.toFixed(1):v.toFixed(0))+'k'; } return '£'+Math.round(n); }
+  function renderGStat(){ var el=$("#gstat"); if(!el) return;
+    var list=(BIZ&&BIZ.businesses)||(typeof DEMO_BIZ!=='undefined'&&DEMO_BIZ?DEMO_BIZ.businesses:[]);
+    if(!list.length){ el.innerHTML=''; return; }
+    var live=list.filter(function(b){return b.stage==='live';}).length;
+    var building=list.filter(function(b){return b.stage==='building';}).length;
+    var avg=Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length);
+    var totRec=list.reduce(function(a,b){return a+parseMoney(b.incomeRecent);},0);
+    var earning=totRec>0;
+    var big=earning?(money(totRec)+'<span class="gsu">/mo</span>'):(avg+'<span class="gsu">% built</span>');
+    var kick=earning?'Group revenue':'Portfolio · pre-revenue';
+    var sub=earning?'↗ scaling':(list.length+' ventures · '+live+' live · '+building+' building');
+    el.innerHTML='<div class="gsmain"><span class="gsk">'+kick+'</span><span class="gsv">'+big+'</span><span class="gsp">'+sub+'</span></div>'+
+      '<div class="gsstats"><div><b>'+list.length+'</b>ventures</div><div><b class="'+(live?'g':'')+'">'+live+'</b>live</div></div>'; }
+  function seriesFor(b){ if(b.history && b.history.length>=2) return b.history.slice();
+    var prog=b.progress||0, out=[], base=Math.max(6,prog*0.45); for(var i=0;i<8;i++){ out.push(base+(prog-base)*(i/7)); } return out; }
+  function sparkPath(series){ var n=series.length, mx=Math.max.apply(null,series), mn=Math.min.apply(null,series), sp=(mx-mn)||1, d='';
+    for(var i=0;i<n;i++){ var x=(i/(n-1))*100, y=25-((series[i]-mn)/sp)*20-2; d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' '; } return d; }
+  function bigChart(b){ var ser=seriesFor(b), up=ser[ser.length-1]>=ser[0], col=up?"#37f2b0":"#ff5566", n=ser.length,
+      mx=Math.max.apply(null,ser), mn=Math.min.apply(null,ser), sp=(mx-mn)||1, d='';
+    for(var i=0;i<n;i++){ var x=(i/(n-1))*100, y=52-((ser[i]-mn)/sp)*44-4; d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' '; }
+    return '<svg class="bigchart" viewBox="0 0 100 58" preserveAspectRatio="none"><path d="'+d+'L100 58 L0 58 Z" fill="'+col+'" opacity=".1"/><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 5px '+col+'80)"/></svg>'; }
   function renderBizList(){
     var box=$("#bizlist"), list=(BIZ&&BIZ.businesses)||[];
     var live=list.filter(function(b){return b.stage==="live";}).length;
-    $("#bizsub").textContent = list.length+" · "+live+" live";
+    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length):0;
+    var totRec=list.reduce(function(a,b){return a+parseMoney(b.incomeRecent);},0);
+    var totPot=list.reduce(function(a,b){return a+parseMoney(b.incomePotential);},0);
+    var building=list.filter(function(b){return b.stage==="building";}).length;
+    var earning=totRec>0;
+    $("#bizsub").textContent = list.length+" ventures";
     var html="";
     if (BIZ && BIZ.umbrella){
-      html += '<button class="bizbtn umbrella" data-biz="__umbrella"><div class="brow"><div><div class="bnm">'+esc(BIZ.umbrella.name)+'</div><div class="bgrp">Umbrella · overview</div></div><div class="chev">›</div></div>'+
-        '<div class="dsum" style="margin-top:8px;font-size:12.5px;">'+esc(BIZ.umbrella.tagline||"")+'</div></button>';
+      var pbig=earning?(money(totRec)+'<span class="pu">/mo now</span>'):(avg+'<span class="pu">% avg build</span>');
+      var parrow=earning?('↗ '+money(totPot)+'/mo potential'):esc(BIZ.umbrella.tagline||"Building toward first revenue");
+      html += '<button class="phero" data-biz="__umbrella">'+
+        '<div class="pk">'+esc(BIZ.umbrella.name)+' · portfolio</div>'+
+        '<div class="pbig">'+pbig+'</div>'+
+        '<div class="parrow">'+parrow+'</div>'+
+        '<div class="pstats"><div><b>'+list.length+'</b>ventures</div><div><b class="g">'+live+'</b>live</div><div><b>'+building+'</b>building</div></div>'+
+        '<div class="popen">View full group workflow ›</div></button>';
     }
-    html += list.map(function(b){
-      return '<button class="bizbtn" data-biz="'+esc(b.id)+'"><div class="brow"><div><div class="bnm">'+esc(b.name)+'</div><div class="bgrp">'+esc(b.group||"")+'</div></div>'+
-        '<span class="stagepill '+stageClass(b.stage)+'">'+esc(b.stage||"")+'</span></div>'+
+    html += '<div class="bizdiv">Ventures · most built first</div>';
+    html += list.slice().sort(function(a,b){ return (b.progress||0)-(a.progress||0); }).map(function(b){
+      var isLive=b.stage==="live", ser=seriesFor(b), up=ser[ser.length-1]>=ser[0], dir=up?"up":"down", lbl=isLive?"income":"progression";
+      return '<button class="bizcard" data-biz="'+esc(b.id)+'">'+
+        '<div class="bcrow"><div class="bcname">'+esc(b.name)+'<small class="bcgrp">'+esc(b.group||"")+'</small></div><span class="stagepill '+stageClass(b.stage)+'">'+esc(b.stage||"")+'</span></div>'+
+        '<div class="bcinc"><div class="bcfig"><span class="bcnow">'+esc(b.incomeRecent||"£0")+'</span><span class="bcto">→ '+esc(b.incomePotential||"—")+'</span></div>'+
+        '<div class="bcchart"><svg class="bspark '+dir+'" viewBox="0 0 100 28" preserveAspectRatio="none"><path d="'+sparkPath(ser)+'"/></svg><span class="bclabel">'+lbl+'</span></div></div>'+
         '<div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div>'+
-        '<div class="pmeta"><span>'+(b.progress||0)+'% to live</span><span>'+esc(b.incomePotential||"")+'</span></div></button>';
+        '<div class="bcmeta"><span>'+(b.progress||0)+'% built</span><span class="bcgo">Open ›</span></div></button>';
     }).join("");
     box.innerHTML=html;
-    box.querySelectorAll(".bizbtn").forEach(function(btn){
+    box.querySelectorAll("[data-biz]").forEach(function(btn){
       btn.addEventListener("click", function(){ haptic("light"); openBiz(btn.getAttribute("data-biz")); });
     });
+    renderGStat();
   }
 
   function renderFlow(flow){
@@ -1204,8 +1440,9 @@
     $("#bizdetail").innerHTML=
       '<div class="dtitle">'+esc(b.name)+'</div><div class="dgroup">'+esc(b.group||"")+' · '+esc(b.stage||"")+'</div>'+
       '<div class="dsum">'+esc(b.summary||"")+'</div>'+
-      '<div class="dcard"><h3>Progress to live</h3><div class="bigprog"><span class="pct">'+(b.progress||0)+'%</span><span class="plbl">'+(b.stage==="live"?"live — now optimise":"until live &amp; earning")+'</span></div><div class="pbar big"><span style="width:'+(b.progress||0)+'%"></span></div></div>'+
+      '<div class="dcard"><h3>Progress to live</h3><div class="bigprog"><span class="pct">'+(b.progress||0)+'%</span><span class="plbl">'+(b.stage==="live"?"live — now optimise":"built")+'</span></div><div class="pbar big"><span style="width:'+(b.progress||0)+'%"></span></div></div>'+
       '<div class="dcard"><h3>Income</h3><div class="inc"><div class="box"><div class="v">'+esc(b.incomeRecent||"£0")+'</div><div class="k">recent</div></div><div class="box"><div class="v">'+esc(b.incomePotential||"—")+'</div><div class="k">potential</div></div></div></div>'+
+      '<div class="dcard"><h3>'+(b.stage==="live"?"Income · last 6 weeks":"Build progression")+'</h3>'+bigChart(b)+'</div>'+
       (b.breakdown&&b.breakdown.length?'<div class="dcard"><h3>Plans &amp; execution</h3><div class="brk">'+b.breakdown.map(function(x){return '<div class="row"><div class="top"><span>'+esc(x.label)+'</span><span class="p">'+(x.pct||0)+'%</span></div><div class="pbar"><span style="width:'+(x.pct||0)+'%"></span></div></div>';}).join("")+'</div></div>':'')+
       (b.toLive&&b.toLive.length?'<div class="dcard"><h3>'+(b.stage==="live"?"To start earning":"What’s left to go live")+'</h3><ul class="checks">'+b.toLive.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul></div>':'')+
       (b.nextActions&&b.nextActions.length?'<div class="dcard"><h3>Your next actions</h3><ul class="checks next">'+b.nextActions.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul></div>':'')+
@@ -1225,12 +1462,17 @@
   document.getElementById("neuronrobot").innerHTML = robot("neuron");
   renderNeuron();
   buildChips();
-  renderAgents(); renderCore(); renderTokens(); renderGraph(); renderMgr();
+  renderAgents(); renderCore(); renderTokens(); renderGraph(); renderMgr(); renderGStat(); loadBusinesses();
+  if(false){ renderApprovals([
+    {id:"flip-float", summary:"Release a \u00a3300 float so Flip can buy the flagged iPhone 13 (est. +\u00a388 margin)."},
+    {id:"sba-price", summary:"Approve the \u00a329/mo launch price for the SBA (sports-betting arb) subscription."}
+  ]); }
   if (state.power){ startLoop(); if (state.mgr.enabled) startMgr(); }
   // attach to the real Atom if a data feed is present; otherwise the demo above stands
   loadLive();
   setInterval(loadLive, 30000);
 })();
 </script>
+
 </body>
 </html>

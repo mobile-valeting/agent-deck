@@ -1,0 +1,2 @@
+# local rollback backups (kept on disk, not tracked)
+index.html.bak-*
