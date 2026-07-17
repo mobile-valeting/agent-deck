@@ -388,6 +388,16 @@
   .pbar > span { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); box-shadow: 0 0 10px rgba(46,230,255,.5); }
   .bizbtn .pmeta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); margin-top: 7px; letter-spacing: .3px; }
 
+  /* ---- ideas panel ---- */
+  .ideacard { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid rgba(255,194,71,.5); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+  .ideacard .icrow { display: flex; align-items: baseline; gap: 10px; }
+  .ideacard .ictitle { font-size: 14.5px; font-weight: 700; color: var(--ink); letter-spacing: -.2px; flex: 1; }
+  .ideacard .icpot { font-family: var(--mono); font-size: 10px; font-weight: 800; color: var(--warn); background: var(--warn-sft); border: 1px solid rgba(255,194,71,.3); border-radius: 6px; padding: 3px 7px; white-space: nowrap; }
+  .ideacard .icnote { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; margin-top: 7px; }
+  .ideacard .icverdict { font-size: 12px; color: var(--ink-2); line-height: 1.45; margin-top: 8px; }
+  .ideacard .icverdict .ick { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--warn); margin-right: 5px; }
+  .ideacard .icsrc { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); margin-top: 9px; word-break: break-word; }
+
   /* ---- business detail ---- */
   .backbtn { align-self: flex-start; background: var(--bg2); border: 1px solid var(--border); color: var(--accent); font-family: var(--sans); font-size: 13.5px; font-weight: 650; cursor: pointer; padding: 7px 14px 7px 10px; border-radius: 999px; margin-bottom: -2px; -webkit-tap-highlight-color: transparent; }
   .dtitle { font-size: 25px; font-weight: 780; letter-spacing: -.6px; }
@@ -1363,6 +1373,19 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
         '<div class="pbar"><span style="width:'+(b.progress||0)+'%"></span></div>'+
         '<div class="bcmeta"><span>'+(b.progress||0)+'% built</span><span class="bcgo">Open ›</span></div></button>';
     }).join("");
+    var ideas=(BIZ&&BIZ.ideas)||[];
+    if (ideas.length){
+      html += '<div class="bizdiv">Ideas · Atom’s suggestions to review</div>';
+      html += ideas.map(function(i){
+        return '<div class="ideacard">'+
+          '<div class="icrow"><div class="ictitle">'+esc(i.title||i.id||"Untitled idea")+'</div>'+
+          (i.potential?'<span class="icpot">'+esc(i.potential)+'</span>':'')+'</div>'+
+          (i.note?'<div class="icnote">'+esc(i.note)+'</div>':'')+
+          (i.verdict?'<div class="icverdict"><span class="ick">verdict</span> '+esc(i.verdict)+'</div>':'')+
+          (i.source?'<div class="icsrc">'+esc(i.source)+'</div>':'')+
+        '</div>';
+      }).join("");
+    }
     box.innerHTML=html;
     box.querySelectorAll("[data-biz]").forEach(function(btn){
       btn.addEventListener("click", function(){ haptic("light"); openBiz(btn.getAttribute("data-biz")); });
