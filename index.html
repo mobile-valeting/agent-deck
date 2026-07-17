@@ -397,6 +397,8 @@
   .ideacard .icverdict { font-size: 12px; color: var(--ink-2); line-height: 1.45; margin-top: 8px; }
   .ideacard .icverdict .ick { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--warn); margin-right: 5px; }
   .ideacard .icsrc { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); margin-top: 9px; word-break: break-word; }
+  .ideacard.risk { border-left-color: rgba(255,93,108,.6); }
+  .ideacard .icrisk { font-family: var(--mono); font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--danger); border: 1px solid rgba(255,93,108,.4); border-radius: 5px; padding: 1px 5px; vertical-align: middle; white-space: nowrap; }
 
   /* ---- business detail ---- */
   .backbtn { align-self: flex-start; background: var(--bg2); border: 1px solid var(--border); color: var(--accent); font-family: var(--sans); font-size: 13.5px; font-weight: 650; cursor: pointer; padding: 7px 14px 7px 10px; border-radius: 999px; margin-bottom: -2px; -webkit-tap-highlight-color: transparent; }
@@ -1377,8 +1379,10 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     if (ideas.length){
       html += '<div class="bizdiv">Ideas · Atom’s suggestions to review</div>';
       html += ideas.map(function(i){
-        return '<div class="ideacard">'+
-          '<div class="icrow"><div class="ictitle">'+esc(i.title||i.id||"Untitled idea")+'</div>'+
+        var risk=(i.risk||"").toLowerCase();
+        return '<div class="ideacard'+(risk==="high"?" risk":"")+'">'+
+          '<div class="icrow"><div class="ictitle">'+esc(i.title||i.id||"Untitled idea")+
+          (risk==="high"?' <span class="icrisk">high risk</span>':'')+'</div>'+
           (i.potential?'<span class="icpot">'+esc(i.potential)+'</span>':'')+'</div>'+
           (i.note?'<div class="icnote">'+esc(i.note)+'</div>':'')+
           (i.verdict?'<div class="icverdict"><span class="ick">verdict</span> '+esc(i.verdict)+'</div>':'')+
