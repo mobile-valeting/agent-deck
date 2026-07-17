@@ -382,6 +382,7 @@
   .stagepill { font-family: var(--mono); font-size: 8.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; white-space: nowrap; margin-left: auto; }
   .stagepill.live { color: var(--good); background: var(--good-sft); border: 1px solid rgba(52,224,140,.3); }
   .stagepill.building { color: var(--accent); background: var(--accent-sft); border: 1px solid rgba(46,230,255,.28); }
+  .stagepill.validating { color: var(--warn); background: var(--warn-sft); border: 1px solid rgba(255,194,71,.3); }
   .stagepill.idea { color: var(--ink-mut); background: var(--bg3); border: 1px solid var(--border); }
   .pbar { height: 6px; border-radius: 4px; background: var(--bg3); overflow: hidden; margin-top: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
   .pbar > span { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); box-shadow: 0 0 10px rgba(46,230,255,.5); }
@@ -1308,7 +1309,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   }
   window.__loadBiz = function(data){ BIZ=data; showView("biz"); renderBizList(); };
 
-  function stageClass(s){ return s==="live"?"live":s==="building"?"building":"idea"; }
+  function stageClass(s){ return s==="live"?"live":s==="building"?"building":s==="validating"?"validating":"idea"; }
   function parseMoney(s){ if(!s) return 0; var m=String(s).replace(/,/g,'').match(/([\d.]+)\s*(k|m)?/i); if(!m) return 0; var n=parseFloat(m[1])||0; var u=(m[2]||'').toLowerCase(); if(u==='k')n*=1000; if(u==='m')n*=1e6; return n; }
   function money(n){ if(n>=1000){ var v=n/1000; return '£'+(v%1?v.toFixed(1):v.toFixed(0))+'k'; } return '£'+Math.round(n); }
   function renderGStat(){ var el=$("#gstat"); if(!el) return;
