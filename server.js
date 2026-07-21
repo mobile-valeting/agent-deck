@@ -14,6 +14,7 @@ const { execFile } = require('child_process');
 const PORT        = Number(process.env.PORT || 8787);
 const HOST        = process.env.HOST || '127.0.0.1';
 const ATOM        = process.env.ATOM_DIR || '/opt/empire/automation-lab/automations/atom';
+const WPOOL       = process.env.WORKER_POOL_DIR || '/opt/empire/automation-lab/scripts/worker-pool';
 const STATIC_DIR  = __dirname;
 const ENV_FILE    = process.env.TELEGRAM_ENV || '/home/tris/n8n-client/telegram.env';
 const ALLOWED_USER= process.env.ALLOWED_TG_USER || '';          // optional: lock to your TG user id
@@ -64,6 +65,109 @@ const sendJSON = (res, code, obj) => { res.writeHead(code, { 'content-type': 'ap
 const readBody = (req) => new Promise((resolve) => { let d = ''; req.on('data', c => { d += c; if (d.length > 1e5) req.destroy(); }); req.on('end', () => resolve(d)); });
 const CT = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
+// ---- Outsourced (worker-pool free-tier LLM router) telemetry -----------------
+// Mirrors pool.py's provider catalogue + FREE_TIER_HINT so the deck shows the same
+// picture as `pool.py --status`, plus an hourly series for the live graph.
+const WP_PROVIDERS = [
+  { name: 'nvidia',     key: 'NVIDIA_API_KEY',     modelEnv: 'NVIDIA_MODEL',     dflt: 'meta/llama-3.3-70b-instruct',          hint: 'free credits, then rate-limited' },
+  { name: 'groq',       key: 'GROQ_API_KEY',       modelEnv: 'GROQ_MODEL',       dflt: 'llama-3.3-70b-versatile',              hint: '~14.4k req/day · ~500k tok/day' },
+  { name: 'gemini',     key: 'GEMINI_API_KEY',     modelEnv: 'GEMINI_MODEL',     dflt: 'gemini-flash-latest',                  hint: '~200 req/day · 15 req/min' },
+  { name: 'openrouter', key: 'OPENROUTER_API_KEY', modelEnv: 'OPENROUTER_MODEL', dflt: 'meta-llama/llama-3.3-70b-instruct:free', hint: '~50 req/day on :free models' },
+  { name: 'cerebras',   key: 'CEREBRAS_API_KEY',   modelEnv: 'CEREBRAS_MODEL',   dflt: 'llama-3.3-70b',                        hint: '~14.4k req/day (free tier)' },
+  { name: 'mistral',    key: 'MISTRAL_API_KEY',    modelEnv: 'MISTRAL_MODEL',    dflt: 'mistral-small-latest',                 hint: 'free tier · ~1 req/sec' },
+  { name: 'sambanova',  key: 'SAMBANOVA_API_KEY',  modelEnv: 'SAMBANOVA_MODEL',  dflt: 'Meta-Llama-3.3-70B-Instruct',          hint: 'free tier · fast inference' },
+  { name: 'cloudflare', key: 'CLOUDFLARE_API_TOKEN', modelEnv: 'CLOUDFLARE_MODEL', dflt: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', hint: '~10k neurons/day (Workers AI)' },
+];
+
+function parseEnvFile(file) {
+  const out = {};
+  try {
+    for (const raw of fs.readFileSync(file, 'utf8').split('\n')) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#') || !line.includes('=')) continue;
+      const i = line.indexOf('=');
+      out[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^["']|["']$/g, '');
+    }
+  } catch {}
+  return out;
+}
+
+// quick, timeboxed liveness check of the python proxy
+function proxyHealth() {
+  return new Promise((resolve) => {
+    const done = (v) => { try { r.destroy(); } catch {} resolve(v); };
+    const r = http.get({ host: '127.0.0.1', port: 8899, path: '/health', timeout: 500 }, (resp) => {
+      let d = ''; resp.on('data', c => d += c);
+      resp.on('end', () => { try { resolve(!!JSON.parse(d).ok); } catch { resolve(false); } });
+    });
+    r.on('error', () => resolve(false));
+    r.on('timeout', () => done(false));
+  });
+}
+
+function buildOutsourced() {
+  const env = parseEnvFile(path.join(WPOOL, '.env'));
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const perProvider = {};
+  const hours = [];                       // last 24 hourly buckets (oldest → newest)
+  for (let h = 23; h >= 0; h--) {
+    const d = new Date(now.getTime() - h * 3600e3);
+    hours.push({ label: String(d.getHours()).padStart(2, '0') + ':00', tokens: 0, calls: 0 });
+  }
+  const recent = [];
+  let totOk = 0, totFail = 0, totTok = 0;
+
+  try {
+    const lines = fs.readFileSync(path.join(WPOOL, 'usage.jsonl'), 'utf8').split('\n');
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      let r; try { r = JSON.parse(line); } catch { continue; }
+      // per-provider tally is "today" only, to match pool.py --status
+      if (r.day === today) {
+        const s = perProvider[r.provider] || (perProvider[r.provider] = { ok: 0, fail: 0, tokens: 0, lastError: null });
+        if (r.ok) { s.ok++; s.tokens += r.total_tokens || 0; totOk++; totTok += r.total_tokens || 0; }
+        else { s.fail++; s.lastError = r.error || null; totFail++; }
+      }
+      // hourly series spans the rolling last 24h (across the midnight boundary)
+      const t = new Date((r.ts || '').replace(' ', 'T'));
+      if (!isNaN(t)) {
+        const hoursAgo = Math.floor((now - t) / 3600e3);
+        if (hoursAgo >= 0 && hoursAgo <= 23) {
+          const b = hours[23 - hoursAgo];
+          b.calls++; if (r.ok) b.tokens += r.total_tokens || 0;
+        }
+        recent.push(r);
+      }
+    }
+  } catch {}
+
+  const providers = WP_PROVIDERS.map((p) => {
+    const s = perProvider[p.name] || { ok: 0, fail: 0, tokens: 0, lastError: null };
+    const hasKey = !!(env[p.key] && env[p.key].length);
+    let status = 'nokey';
+    if (hasKey) status = s.fail > 0 && s.ok === 0 ? 'error' : s.ok > 0 ? 'live' : 'ready';
+    return {
+      name: p.name, hasKey, status,
+      model: env[p.modelEnv] || p.dflt, hint: p.hint,
+      ok: s.ok, fail: s.fail, tokens: s.tokens, lastError: s.lastError,
+    };
+  });
+
+  const online = providers.filter((p) => p.hasKey).length;
+  const recentTail = recent.slice(-14).reverse().map((r) => ({
+    ts: r.ts, provider: r.provider, ok: !!r.ok,
+    tokens: r.total_tokens || 0, error: r.error || null,
+  }));
+
+  return {
+    updatedAt: now.toISOString(),
+    today: { calls: totOk + totFail, ok: totOk, fail: totFail, tokens: totTok },
+    providersOnline: online, providersTotal: WP_PROVIDERS.length,
+    providers, series: hours, recent: recentTail,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   const p = new URL(req.url, `http://${req.headers.host}`).pathname;
 
@@ -86,6 +190,22 @@ const server = http.createServer(async (req, res) => {
     try { const d = fs.readFileSync(path.join(ATOM, 'state', 'businesses.json'), 'utf8');
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(d); }
     catch { return sendJSON(res, 404, { error: 'no businesses.json' }); }
+  }
+
+  if (p === '/capabilities.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    try { const d = fs.readFileSync(path.join(ATOM, 'state', 'capabilities.json'), 'utf8');
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(d); }
+    catch { return sendJSON(res, 404, { error: 'no capabilities.json yet — waiting for first self-upgrade run' }); }
+  }
+
+  if (p === '/outsourced.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    try {
+      const data = buildOutsourced();
+      data.proxy = { up: await proxyHealth(), host: '127.0.0.1', port: 8899, url: 'http://127.0.0.1:8899/v1' };
+      return sendJSON(res, 200, data);
+    } catch (e) { return sendJSON(res, 500, { error: 'outsourced build failed', detail: String(e) }); }
   }
 
   if (p === '/api/command' && req.method === 'POST') {
@@ -125,6 +245,30 @@ const server = http.createServer(async (req, res) => {
     try { fs.writeFileSync(file, JSON.stringify(store, null, 2) + '\n'); } catch { return sendJSON(res, 500, { error: 'write failed' }); }
     if (enabledNow) kickWorker();
     return sendJSON(res, 200, { ok: true });
+  }
+
+  if (p === '/needed.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    try { const d = fs.readFileSync(path.join(ATOM, 'state', 'needed-from-tris.json'), 'utf8');
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(d); }
+    catch { return sendJSON(res, 404, { error: 'no needed-from-tris.json yet' }); }
+  }
+
+  if (p === '/api/needed-done' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const id = String(j.id || '').slice(0, 60);
+    if (!id) return sendJSON(res, 400, { error: 'need id' });
+    let action = '';
+    try { const nf = JSON.parse(fs.readFileSync(path.join(ATOM, 'state', 'needed-from-tris.json'), 'utf8'));
+      const it = (nf.items || []).find(x => x.id === id); if (it) action = String(it.action || '').slice(0, 120); } catch {}
+    const text = `[Agent Deck] Needed-from-Tris item "${id}"${action ? ` (${action})` : ''}: Tris marks this DONE. Verify it for real (key present / account works / reply received), then set doneAt in state/needed-from-tris.json and refresh the vault mirror + JARVIS block. If it doesn't verify, reopen it and tell Tris exactly what's missing.`;
+    // same block-reply path as approvals (worker Step 1 reads inbox.jsonl)
+    const line = JSON.stringify({ update_id: 0, date: Math.floor(Date.now() / 1000), text, source: 'agent-deck' }) + '\n';
+    try { fs.appendFileSync(path.join(ATOM, 'state', 'inbox.jsonl'), line); }
+    catch { return sendJSON(res, 500, { error: 'write failed' }); }
+    kickWorker();
+    return sendJSON(res, 200, { ok: true, id });
   }
 
   if (p === '/api/approve' && req.method === 'POST') {

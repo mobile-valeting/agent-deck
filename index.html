@@ -271,6 +271,49 @@
   .mgr.neuron.active .ovstate { color: var(--accent); }
   .mgr.neuron.active .ovstate .pulse { background: var(--accent); animation: ping-c 1.8s ease-out infinite; }
 
+  /* command-chain role tags (CEO / CFO / manager) */
+  .roletag { font-family: var(--mono); font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; white-space: nowrap; }
+  .roletag.ceo { color: #04252c; background: linear-gradient(180deg, var(--accent-2), var(--accent-deep)); }
+  .roletag.cfo { color: #2a1c00; background: linear-gradient(180deg, #ffd873, var(--warn)); }
+  .roletag.mgr { color: var(--ink-2); background: var(--bg3); border: 1px solid var(--border); }
+  .mgr .hardstop { margin-top: 2px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 9.5px; color: var(--warn); background: var(--warn-sft); border: 1px solid rgba(255,194,71,.24); border-radius: 9px; padding: 8px 11px; letter-spacing: .3px; line-height: 1.4; }
+  .mgr .hardstop svg { width: 13px; height: 13px; flex: 0 0 auto; }
+
+  /* live mission-metrics strip — top of deck, updates every poll */
+  .missionstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .mstat-tile { background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 46%), var(--bg1); border: 1px solid var(--border); border-radius: 14px; padding: 11px 8px 10px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .mstat-tile .v { font-size: 21px; font-weight: 780; letter-spacing: -.6px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .mstat-tile .k { font-family: var(--mono); font-size: 8px; color: var(--ink-mut); text-transform: uppercase; letter-spacing: .7px; margin-top: 5px; }
+  .mstat-tile.live .v { color: var(--good); }
+  .mstat-tile.live::after { content: ""; position: absolute; top: 8px; right: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--good); animation: ping 1.8s ease-out infinite; }
+  .mstat-tile.attn { border-color: rgba(255,194,71,.3); }
+  .mstat-tile.attn .v { color: var(--warn); }
+
+  /* builds · hosted links */
+  .buildlinks { display: flex; flex-direction: column; gap: 9px; }
+  .buildrow { background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 45%), var(--bg1); border: 1px solid var(--border); border-radius: 14px; padding: 11px 13px; box-shadow: var(--shadow); }
+  .buildrow .btop { display: flex; align-items: center; gap: 8px; }
+  .buildrow .bnm { font-size: 13.5px; font-weight: 680; letter-spacing: -.1px; }
+  .buildrow .bstage { margin-left: auto; }
+  .buildrow .blinks { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+  .blink { font-family: var(--mono); font-size: 10px; color: var(--accent); background: var(--accent-sft); border: 1px solid rgba(46,230,255,.25); border-radius: 8px; padding: 6px 10px 6px 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; -webkit-tap-highlight-color: transparent; }
+  .blink:active { transform: scale(.96); }
+  .buildrow .bnone { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mut); margin-top: 7px; }
+
+  /* functions control deck (reads capabilities.json, auto-grows) */
+  .functions { display: flex; flex-direction: column; gap: 13px; }
+  .fngroup .fnhead { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-mut); margin: 0 2px 7px; display: flex; align-items: center; gap: 8px; }
+  .fngroup .fnhead .c { margin-left: auto; color: var(--ink-2); }
+  .fnrow { display: flex; align-items: center; gap: 10px; background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 45%), var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; box-shadow: var(--shadow); }
+  .fnrow + .fnrow { margin-top: 7px; }
+  .fnrow .fnmid { flex: 1; min-width: 0; }
+  .fnrow .fnm { font-size: 12.5px; font-weight: 660; letter-spacing: -.1px; }
+  .fnrow .fnd { font-family: var(--mono); font-size: 9px; color: var(--ink-mut); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fnrow .fnstat { font-family: var(--mono); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; padding: 3px 7px; border-radius: 6px; color: var(--ink-mut); background: var(--bg3); border: 1px solid var(--border); white-space: nowrap; flex: 0 0 auto; }
+  .fnrow .fnstat.on { color: var(--good); background: var(--good-sft); border-color: rgba(52,224,140,.3); }
+  .fnrow .fnstat.warn { color: var(--warn); background: var(--warn-sft); border-color: rgba(255,194,71,.3); }
+  .fnrow .fnstat.bad { color: var(--danger); background: var(--danger-sft); border-color: rgba(255,93,108,.3); }
+
   /* iOS switch */
   .switch { width: 50px; height: 30px; border-radius: 999px; background: var(--bg3); border: 1px solid var(--border-2); position: relative; cursor: pointer; flex: 0 0 auto; transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; -webkit-tap-highlight-color: transparent; }
   .switch .knob { position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .25s cubic-bezier(.32,.72,.35,1.15); box-shadow: 0 2px 5px rgba(0,0,0,.45); }
@@ -590,6 +633,25 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
 .appbtn.ok{ background:rgba(55,242,176,.12) !important; border-color:rgba(55,242,176,.35) !important; color:var(--good) !important; }
 .appbtn.no{ background:rgba(207,22,38,.1) !important; border-color:rgba(207,22,38,.4) !important; color:#ff5566 !important; }
 @media (prefers-reduced-motion:reduce){ .needbang{ animation:none; } }
+
+/* ===== "needed to finish" — cyan to-do variant of the alert button ===== */
+.needbtn.finish{ background:rgba(46,230,255,.07); border-color:rgba(46,230,255,.32);
+  box-shadow:0 0 0 1px rgba(46,230,255,.1), 0 10px 28px rgba(0,0,0,.35), 0 0 32px -12px rgba(46,230,255,.45); }
+.needbtn.finish .needbang{ background:var(--accent); color:#00222b; font-size:15px; animation:none; box-shadow:0 0 14px rgba(46,230,255,.55); }
+.needbtn.finish .needtxt b{ color:var(--accent); }
+.needbtn.finish .needchev{ color:var(--accent); }
+.todoitem{ display:flex; align-items:flex-start; gap:11px; padding:12px 2px; border-top:1px solid var(--border); text-align:left; }
+.todoitem:first-child{ border-top:none; }
+.todochk{ flex:0 0 auto; width:22px; height:22px; margin-top:1px; border-radius:7px; border:1.5px solid rgba(46,230,255,.5);
+  background:rgba(46,230,255,.06); display:grid; place-items:center; color:transparent; font-size:14px; font-weight:900; cursor:pointer; }
+.todoitem.done .todochk{ background:var(--good); border-color:var(--good); color:#04180e; }
+.todoitem.done .todoact{ text-decoration:line-through; opacity:.55; }
+.todomid{ flex:1; min-width:0; }
+.todoven{ font-family:var(--mono); font-size:8.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); }
+.todoact{ font-size:12.5px; font-weight:600; line-height:1.45; margin-top:2px; }
+.todowhy{ font-size:10.5px; color:var(--ink-mut); line-height:1.5; margin-top:3px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.todokind{ flex:0 0 auto; font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; padding:2.5px 7px; border-radius:999px; border:1px solid var(--border); color:var(--ink-mut); margin-top:2px; }
+.todokind.now{ color:var(--warn); border-color:rgba(255,194,71,.4); }
 .nav{ background:rgba(6,9,16,.82) !important; }
 
 /* ON/OFF SWITCHES = RED when on (changes with state) */
@@ -605,7 +667,54 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
 .wrap{ overflow-x:hidden; }
 .pager{ display:flex; overflow-x:auto; overflow-y:visible; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; scrollbar-width:none; align-items:flex-start; }
 .pager::-webkit-scrollbar{ display:none; }
-#view-deck, #view-biz{ flex:0 0 100%; min-width:100%; scroll-snap-align:center; scroll-snap-stop:always; display:flex !important; }
+#view-deck, #view-biz, #view-out{ flex:0 0 100%; min-width:100%; scroll-snap-align:center; scroll-snap-stop:always; display:flex !important; }
+#view-out{ flex-direction:column; gap:14px; }
+
+/* ===== Outsourced (free-tier router) ===== */
+.ostat{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.ostat .ob{ background:linear-gradient(180deg,rgba(255,255,255,.028),transparent 42%),var(--bg1); border:1px solid var(--border); border-radius:var(--r-ctl); padding:12px 12px 11px; }
+.ostat .ov{ font-size:22px; font-weight:750; letter-spacing:-.6px; font-variant-numeric:tabular-nums; }
+.ostat .ok2{ font-family:var(--mono); font-size:9.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-mut); margin-top:3px; }
+.ostat .ov.cy{ color:var(--accent); }
+.proxycard{ display:flex; align-items:center; gap:12px; padding:13px 15px; }
+.proxycard .pdot{ width:9px; height:9px; border-radius:50%; background:var(--ink-mut); flex:0 0 auto; box-shadow:0 0 0 4px rgba(255,255,255,.03); }
+.proxycard.up .pdot{ background:var(--good); box-shadow:0 0 10px rgba(52,224,140,.6),0 0 0 4px rgba(52,224,140,.1); }
+.proxycard.down .pdot{ background:var(--danger); box-shadow:0 0 10px rgba(255,93,108,.5),0 0 0 4px rgba(255,93,108,.1); }
+.proxycard .ph{ font-size:13px; font-weight:650; }
+.proxycard .pu{ font-family:var(--mono); font-size:10.5px; color:var(--ink-2); margin-top:2px; word-break:break-all; }
+.proxycard .pstat{ margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-mut); flex:0 0 auto; }
+.proxycard.up .pstat{ color:var(--good); }
+.proxycard.down .pstat{ color:var(--danger); }
+.oprovlist{ display:flex; flex-direction:column; gap:9px; }
+.oprow{ background:linear-gradient(180deg,rgba(255,255,255,.026),transparent 42%),var(--bg1); border:1px solid var(--border); border-radius:var(--r-ctl); padding:12px 13px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+.oprow .ostrip{ position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--ink-mut); opacity:.6; }
+.oprow.live .ostrip{ background:var(--accent); opacity:1; box-shadow:0 0 12px rgba(46,230,255,.5); }
+.oprow.ready .ostrip{ background:var(--steel); }
+.oprow.error .ostrip{ background:var(--danger); }
+.oprow.nokey{ opacity:.62; }
+.oprow .otop{ display:flex; align-items:center; gap:9px; }
+.oprow .onm{ font-size:14.5px; font-weight:700; letter-spacing:.2px; text-transform:capitalize; }
+.oprow .otag{ font-family:var(--mono); font-size:8.5px; letter-spacing:1.2px; text-transform:uppercase; padding:2.5px 7px; border-radius:999px; border:1px solid var(--border); color:var(--ink-mut); background:var(--bg2); }
+.oprow.live .otag{ color:var(--accent); border-color:rgba(46,230,255,.35); background:var(--accent-sft); }
+.oprow.ready .otag{ color:var(--steel); border-color:var(--steel-sft); background:var(--steel-sft); }
+.oprow.error .otag{ color:var(--danger); border-color:rgba(255,93,108,.35); background:var(--danger-sft); }
+.oprow .ordr{ margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--ink-mut); }
+.oprow .omdl{ font-family:var(--mono); font-size:10.5px; color:var(--ink-2); margin-top:6px; word-break:break-all; }
+.oprow .ohint{ font-size:10.5px; color:var(--ink-mut); margin-top:3px; }
+.oprow .obar{ height:5px; border-radius:3px; background:var(--bg3); margin-top:9px; overflow:hidden; }
+.oprow .obar > i{ display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,var(--accent-deep),var(--accent)); box-shadow:0 0 8px rgba(46,230,255,.4); }
+.oprow .ostats{ display:flex; gap:14px; margin-top:9px; }
+.oprow .ostats span{ font-size:11px; color:var(--ink-2); }
+.oprow .ostats b{ font-family:var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; }
+.oprow .ostats .bad b{ color:var(--danger); }
+.oprow .oerr{ font-family:var(--mono); font-size:9.5px; color:var(--danger); margin-top:7px; opacity:.85; }
+.ofeedrow{ display:flex; align-items:center; gap:9px; padding:8px 2px; border-top:1px solid var(--border); font-size:12px; }
+.ofeedrow:first-child{ border-top:none; }
+.ofeedrow .fd{ width:6px; height:6px; border-radius:50%; background:var(--good); flex:0 0 auto; }
+.ofeedrow .fd.bad{ background:var(--danger); }
+.ofeedrow .fp{ font-weight:650; text-transform:capitalize; }
+.ofeedrow .ft{ margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--ink-mut); }
+.ofeedrow .fk{ font-family:var(--mono); font-size:10.5px; color:var(--ink-2); }
 
 /* ---- running / stop state = blood red (was cyan) ---- */
 .core.on .powerbtn::before{ background:conic-gradient(from 0deg, var(--danger), transparent 25%, var(--danger) 55%, transparent 78%, var(--danger)) !important; }
@@ -628,6 +737,50 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
 @keyframes atomspin{ to{ transform:rotate(360deg); } }
 @keyframes atompulse{ 0%,100%{ opacity:.72; } 50%{ opacity:1; } }
 @media (prefers-reduced-motion:reduce){ .pager{ scroll-behavior:auto; } .atomlogo .orbits, .atomlogo .nuc{ animation:none; } }
+
+/* ===== interaction feedback layer ===== */
+/* every tappable acknowledges the press instantly */
+button, .navbtn, .switch, .miniswitch, .agent, [role="switch"], .appitem, .bizrow, .needbtn, .addbtn { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled):active, .navbtn:active, .needbtn:active, .bizrow:active, .appitem:active { transform: scale(.972); filter: brightness(1.12); }
+.navbtn, .needbtn, .bizrow { transition: transform .11s ease, filter .11s ease, color .2s ease, background .2s ease; }
+button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
+/* async button: brief spinner while pending, green tick flash on success */
+.btnspin{ display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.25); border-top-color: var(--accent); border-radius:50%; animation: spin .6s linear infinite; vertical-align:-2px; }
+@keyframes okflash { 0%{ box-shadow:0 0 0 0 rgba(52,224,140,.55);} 100%{ box-shadow:0 0 0 14px rgba(52,224,140,0);} }
+.flash-ok{ animation: okflash .6s ease-out; }
+@keyframes rowin { from{ opacity:0; transform:translateX(-8px);} to{ opacity:1; transform:none;} }
+.logrow{ animation: rowin .32s cubic-bezier(.32,.72,.35,1.2); }
+
+/* toasts — glass confirmation that an action landed */
+#toastwrap{ position:fixed; left:0; right:0; bottom:calc(94px + env(safe-area-inset-bottom)); z-index:70; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; padding:0 14px; }
+.toast{ display:flex; align-items:center; gap:10px; max-width:92%; padding:11px 16px; border-radius:14px;
+  background:rgba(16,20,27,.94); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--border-2); box-shadow:0 12px 34px rgba(0,0,0,.55); color:var(--ink);
+  font-size:13px; font-weight:640; letter-spacing:.1px;
+  transform:translateY(16px) scale(.96); opacity:0; transition:transform .3s cubic-bezier(.32,.72,.35,1.2), opacity .3s ease; }
+.toast.in{ transform:none; opacity:1; }
+.toast .ti{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+.toast.ok{ border-color:rgba(46,230,255,.42); box-shadow:0 12px 34px rgba(0,0,0,.55), 0 0 20px rgba(46,230,255,.22); }
+.toast.ok .ti{ background:var(--accent); box-shadow:0 0 9px var(--accent); }
+.toast.good{ border-color:rgba(52,224,140,.42); }
+.toast.good .ti{ background:var(--good); box-shadow:0 0 9px var(--good); }
+.toast.err{ border-color:rgba(255,93,108,.45); }
+.toast.err .ti{ background:var(--danger); box-shadow:0 0 9px var(--danger); }
+.toast.info .ti{ background:var(--ink-mut); }
+@media (prefers-reduced-motion:reduce){ .toast{ transition:opacity .2s ease; transform:none; } .logrow{ animation:none; } .btnspin{ animation-duration:1.2s; } }
+
+/* pull-to-refresh indicator */
+#ptr{ position:fixed; top:0; left:50%; margin-top:8px; width:34px; height:34px; border-radius:50%; z-index:66;
+  background:rgba(16,20,27,.94); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid var(--border-2);
+  display:grid; place-items:center; opacity:0; transform:translateX(-50%) translateY(-52px);
+  box-shadow:0 6px 20px rgba(0,0,0,.5); pointer-events:none; }
+#ptr.snap{ transition:transform .32s cubic-bezier(.32,.72,.35,1.2), opacity .25s ease; }
+#ptr .chev{ width:15px; height:15px; color:var(--accent); transition:transform .2s ease; }
+#ptr.ready .chev{ transform:rotate(180deg); }
+/* core "working" breathe while Atom is running */
+@keyframes corebreathe { 0%,100%{ opacity:.78; } 50%{ opacity:1; } }
+.core.on .powerbtn .glyph{ animation: corebreathe 2.1s ease-in-out infinite; }
+@media (prefers-reduced-motion:reduce){ .core.on .powerbtn .glyph{ animation:none; } #ptr.snap{ transition:opacity .2s ease; } }
 </style>
 </head>
 <body>
@@ -652,11 +805,16 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-5h6v5"/><path d="M10 11h.01M14 11h.01"/></svg>
       <span>Businesses</span>
     </button>
+    <button class="navbtn" data-view="out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 1 3.9 3.1 3.5 3.5 0 0 1-.4 6.9H8a4 4 0 0 1-.8-7.9A4 4 0 0 1 12 3Z"/><path d="M12 13v8"/><path d="M9 18l3 3 3-3"/></svg>
+      <span>Outsourced</span>
+    </button>
   </div>
 
   <div class="pager" id="pager">
   <div id="view-deck">
   <div class="gstat" id="gstat"></div>
+  <div class="missionstats" id="missionstats"></div>
   <div class="card core" id="core">
     <div class="lbl top" id="corelbl">system standby</div>
     <button class="powerbtn" id="powerbtn" aria-label="Toggle agents">
@@ -668,9 +826,15 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     <div class="sub" id="coresub"><b>0</b> of <b>0</b> agents active</div>
   </div>
 
+  <button class="needbtn finish" id="neededbtn" style="display:none;">
+    <span class="needbang">✓</span>
+    <span class="needtxt"><b>Needed to finish</b><span class="needsub" id="neededcount">0 to-dos</span></span>
+    <span class="needchev">›</span>
+  </button>
+
   <button class="needbtn" id="approvals" style="display:none;">
     <span class="needbang">!</span>
-    <span class="needtxt"><b>Needs you</b><span class="needsub" id="appcount">0 pending</span></span>
+    <span class="needtxt"><b>Needs permission</b><span class="needsub" id="appcount">0 pending</span></span>
     <span class="needchev">›</span>
   </button>
 
@@ -703,14 +867,14 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     </div>
   </div>
 
-  <div class="sec c-cyan"><h2>Managers</h2><span class="seclabel">HEAD BRAIN · OVERSIGHT</span></div>
+  <div class="sec c-cyan"><h2>Command chain</h2><span class="seclabel">CEO · CFO · WORKERS</span></div>
   <div class="card mgr neuron" id="neuroncard">
     <div class="strip"></div>
     <div class="in">
       <div class="row1">
         <div class="ovface"><span id="neuronrobot"></span><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l1.6 1.6M17.4 17.4L19 19M19 5l-1.6 1.6M6.6 17.4L5 19"/></svg></span></div>
         <div class="mid">
-          <div class="nm">Neuron <span class="mdl opus" id="neuronmodel">Opus</span></div>
+          <div class="nm"><span class="roletag ceo">CEO</span>Neuron <span class="mdl opus" id="neuronmodel">Opus</span></div>
           <div class="desc">Head brain of every process — watches all bots, double-checks work, and promotes a struggling bot to a bigger model just for that task, then puts it back. Keeps structure &amp; productivity.</div>
         </div>
         <div class="switch on" id="neurontgl" role="switch" aria-checked="true" aria-label="Toggle Neuron" tabindex="0"><span class="knob"></span></div>
@@ -725,7 +889,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
       <div class="row1">
         <div class="ovface"><span id="ovrobot"></span><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span></div>
         <div class="mid">
-          <div class="nm">Overseer <span class="mdl fable" id="ovmodel">Fable-5</span></div>
+          <div class="nm"><span class="roletag mgr">Manager</span>Overseer <span class="mdl fable" id="ovmodel">Fable-5</span></div>
           <div class="desc">Audits every system you control and fixes what's broken on its own — no prompt. Promotes a worker to a bigger model when it falls behind.</div>
         </div>
         <div class="switch" id="ovtgl" role="switch" aria-checked="false" aria-label="Toggle Overseer" tabindex="0"><span class="knob"></span></div>
@@ -736,11 +900,32 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     </div>
   </div>
 
+  <div class="card mgr cfo" id="cfocard">
+    <div class="strip"></div>
+    <div class="in">
+      <div class="row1">
+        <div class="ovface" style="color:var(--warn)"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M12 3 9 9l3 12 3-12z"/></svg></span></div>
+        <div class="mid">
+          <div class="nm"><span class="roletag cfo">CFO · Treasury</span>Capital Markets</div>
+          <div class="desc">Governs the money — the copy-trading treasury. Empire income DCAs in &amp; compounds. Memecoin · stocks · forex, paper-first.</div>
+        </div>
+      </div>
+      <div class="mstats"><span><b>3</b>streams</span><span><b>£0</b>deployed</span><span><b style="font-size:12px">PAPER</b>mode</span></div>
+      <div class="hardstop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Hard stop — needs your verify + deposit to go live</div>
+    </div>
+  </div>
+
   <div class="sec c-green"><h2>Workers</h2><button class="addbtn" id="addtop">+ New worker</button></div>
   <div class="agrid" id="agrid"></div>
 
   <div class="sec c-steel" id="microsechead" hidden><h2>Micro bots</h2><span class="seclabel">PASSIVE · DETERMINISTIC</span></div>
   <div class="microgrid" id="microgrid" hidden></div>
+
+  <div class="sec c-cyan"><h2>Functions</h2><span class="seclabel" id="funcount">CONTROL DECK</span></div>
+  <div class="functions" id="functions"></div>
+
+  <div class="sec c-cyan"><h2>Builds · where it's hosted</h2><span class="seclabel">TAP TO OPEN ↗</span></div>
+  <div class="buildlinks" id="buildlinks"></div>
 
   <div class="log">
     <div class="lh"><span class="d g"></span><span class="ttl">live feed</span></div>
@@ -751,6 +936,43 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   <div id="view-biz" hidden>
     <div class="bizhead">Your businesses<span class="bizsub" id="bizsub"></span></div>
     <div id="bizlist" class="bizlist"><div class="bizloading">Loading…</div></div>
+  </div>
+
+  <div id="view-out" hidden>
+    <div class="bizhead">Outsourced<span class="bizsub">free-tier LLM router · £0</span></div>
+
+    <!-- de-boxed hero telemetry strip -->
+    <div class="ostat" id="ostat"></div>
+
+    <!-- live usage graph (reuses deck telemetry pattern) -->
+    <div class="card">
+      <div class="graph-head">
+        <div><div class="t">Tokens routed · 24h</div><div class="big tabnum" id="otok">0</div></div>
+        <div class="rate idle tabnum" id="orate">— idle</div>
+      </div>
+      <div class="gwrap">
+        <svg class="graph" id="ograph" viewBox="0 0 300 96" preserveAspectRatio="none">
+          <defs><linearGradient id="ogfill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--graph-a)"/><stop offset="100%" stop-color="var(--graph-b)"/>
+          </linearGradient></defs>
+          <g id="ogrid" stroke="var(--border)" stroke-width="1" opacity=".55"></g>
+          <path id="oarea" fill="url(#ogfill)" d=""/>
+          <path id="oline" fill="none" stroke="var(--graph)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d=""/>
+          <circle id="oendpt" r="3.5" fill="var(--graph)" stroke="var(--surface)" stroke-width="2" cx="0" cy="0"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- proxy status -->
+    <div class="card proxycard" id="oproxy"></div>
+
+    <div class="sec c-cyan"><h2>Providers</h2><span class="seclabel">FAILOVER ORDER · FREE TIER</span></div>
+    <div id="oprovlist" class="oprovlist"><div class="bizloading">Loading…</div></div>
+
+    <div class="log">
+      <div class="lh"><span class="d g"></span><span class="ttl">routed calls</span></div>
+      <div class="body" id="ofeed"><div class="empty">Waiting for routed calls…</div></div>
+    </div>
   </div>
 
   </div><!-- /pager -->
@@ -777,6 +999,8 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     try { TG.disableVerticalSwipes && TG.disableVerticalSwipes(); } catch(e){}
   }
   function haptic(kind){ if (TG && TG.HapticFeedback){ try{ TG.HapticFeedback.impactOccurred(kind||"light"); }catch(e){} } }
+  function hapticN(type){ if (TG && TG.HapticFeedback){ try{ TG.HapticFeedback.notificationOccurred(type||"success"); }catch(e){} } }
+  function hapticSel(){ if (TG && TG.HapticFeedback){ try{ TG.HapticFeedback.selectionChanged(); }catch(e){} } }
 
   var $ = function(s){ return document.querySelector(s); };
   var STORE = "agentdeck.v2";
@@ -937,7 +1161,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   })();
 
   function renderTokens(){
-    $("#tok").textContent = fmt(state.tokens);
+    animateCount($("#tok"), state.tokens);
     var r=$("#rate");
     if (state.power){ r.className="rate tabnum"; r.textContent="▲ live"; }
     else { r.className="rate idle tabnum"; r.textContent="— idle"; }
@@ -1056,6 +1280,62 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   function fmtClock(iso){ if(!iso) return "--:--"; var d=new Date(iso); return isNaN(d)? "--:--" : pad2(d.getHours())+":"+pad2(d.getMinutes()); }
   function prettyName(id){ return String(id).split(/[-_]/).map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(" "); }
 
+  function renderBuildLinks(list){
+    var el=$("#buildlinks"); if(!el || !Array.isArray(list)) return;
+    var rows = list.filter(function(b){ return (b.stage && b.stage!=="idea") || (b.shortcuts && b.shortcuts.some(function(s){return s.href;})); });
+    if(!rows.length){ el.innerHTML=''; return; }
+    el.innerHTML = rows.map(function(b){
+      var hosted = (b.shortcuts||[]).filter(function(s){ return s.href; });
+      var links = hosted.length
+        ? '<div class="blinks">'+hosted.map(function(s){ return '<a class="blink" href="'+esc(s.href)+'" target="_blank" rel="noopener">'+esc(s.label)+' ↗</a>'; }).join("")+'</div>'
+        : '<div class="bnone">not hosted yet · '+esc(b.stage||"")+'</div>';
+      var stage = (b.stage||"").replace(/[^a-z]/gi,"");
+      return '<div class="buildrow"><div class="btop"><span class="bnm">'+esc(b.name)+'</span>'+
+        (b.stage?'<span class="stagepill bstage '+esc(stage)+'">'+esc(b.stage)+'</span>':'')+'</div>'+links+'</div>';
+    }).join("");
+  }
+  async function loadBuildLinks(){
+    try { var r = await fetch("businesses.json", { cache:"no-store", headers: tgHeaders() });
+      if (r.ok){ var d = await r.json(); renderBuildLinks(d.businesses || []); } } catch(e){}
+  }
+  function renderFunctions(cap){
+    var el=$("#functions"); if(!el || !cap || !Array.isArray(cap.functions)) return;
+    var order=["Ventures","Routines","Skills","Micro-bots","Outsourced"];
+    var groups={}; cap.functions.forEach(function(f){ (groups[f.group]=groups[f.group]||[]).push(f); });
+    var s=cap.summary||{}, fc=$("#funcount");
+    if(fc) fc.textContent = cap.functions.length+" FUNCTIONS · "+(s.healthBad?("⚠ "+s.healthBad+" FLAG"):"HEALTHY");
+    el.innerHTML = order.filter(function(g){ return groups[g]; }).map(function(g){
+      var rows = groups[g].map(function(f){
+        var st=String(f.status||""), cls="";
+        if(/live|installed|scheduled|active|ready|building|wiring|scaffold|validating/i.test(st)) cls = f.enabled?"on":"";
+        if(/nokey|not-scheduled|idea/i.test(st)) cls="warn";
+        if(/down|missing|error/i.test(st)) cls="bad";
+        return '<div class="fnrow"><div class="fnmid"><div class="fnm">'+esc(f.name)+'</div>'+
+          (f.detail?'<div class="fnd">'+esc(f.detail)+'</div>':'')+'</div><span class="fnstat '+cls+'">'+esc(st)+'</span></div>';
+      }).join("");
+      return '<div class="fngroup"><div class="fnhead">'+esc(g)+'<span class="c">'+groups[g].length+'</span></div>'+rows+'</div>';
+    }).join("");
+  }
+  async function loadFunctions(){
+    try { var r = await fetch("capabilities.json", { cache:"no-store", headers: tgHeaders() });
+      if (r.ok){ renderFunctions(await r.json()); } } catch(e){}
+  }
+  function renderMissionStats(d){
+    var el=$("#missionstats"); if(!el) return;
+    var agents = Array.isArray(d.agents) ? d.agents : [];
+    var live = agents.filter(function(a){ return a.enabled; }).length;
+    var needs = (d.approvals ? d.approvals.length : 0) + (Array.isArray(d.blocks) ? d.blocks.length : 0);
+    var feed = Array.isArray(d.activity) ? d.activity.length : 0;
+    var tiles = [
+      { k:"Ventures", v:agents.length, cls:"" },
+      { k:"Live", v:live, cls:"live" },
+      { k:"On feed", v:feed, cls:"" },
+      { k:"Needs OK", v:needs, cls: needs ? "attn" : "" }
+    ];
+    el.innerHTML = tiles.map(function(t){
+      return '<div class="mstat-tile '+t.cls+'"><div class="v tabnum">'+t.v+'</div><div class="k">'+t.k+'</div></div>';
+    }).join("");
+  }
   function applyLive(d){
     if (!d || !d.status) return;
     LIVE = true; stopLoop(); stopMgr();
@@ -1092,6 +1372,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     renderMicrobots(d.microbots);
 
     renderApprovals(d.approvals);
+    renderMissionStats(d);
 
     var body=$("#logbody"); body.innerHTML="";
     var items = d.activity || [];
@@ -1116,6 +1397,74 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   window.__applyLive = applyLive; // local testing hook
 
   function tgHeaders(){ return (TG && TG.initData) ? { "X-Telegram-Init-Data": TG.initData } : {}; }
+  // toast — glass confirmation that an action actually landed
+  function toast(msg, type){
+    var w=document.getElementById("toastwrap");
+    if(!w){ w=document.createElement("div"); w.id="toastwrap"; document.body.appendChild(w); }
+    var t=document.createElement("div"); t.className="toast "+(type||"ok");
+    t.innerHTML='<span class="ti"></span><span class="tt"></span>';
+    t.querySelector(".tt").textContent=msg;
+    w.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add("in"); });
+    setTimeout(function(){ t.classList.remove("in"); setTimeout(function(){ if(t.parentNode) t.remove(); }, 320); }, 2600);
+  }
+  // flash a green success ring on an element
+  function flashOk(el){ if(!el) return; el.classList.remove("flash-ok"); void el.offsetWidth; el.classList.add("flash-ok"); }
+  // smoothly tick a number up/down to its new value instead of snapping
+  function animateCount(el, to){
+    if(!el) return; to = +to || 0;
+    var from = parseInt((el.getAttribute("data-v")!=null ? el.getAttribute("data-v") : el.textContent||"0").toString().replace(/[^0-9-]/g,"")) || 0;
+    if(from===to){ el.textContent=fmt(to); el.setAttribute("data-v",to); return; }
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches;
+    if(reduce){ el.textContent=fmt(to); el.setAttribute("data-v",to); return; }
+    var start=performance.now(), dur=650;
+    (function step(now){
+      var p=Math.min((now-start)/dur,1), e=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(from+(to-from)*e));
+      if(p<1) requestAnimationFrame(step); else { el.textContent=fmt(to); el.setAttribute("data-v",to); }
+    })(start);
+  }
+  // pull-to-refresh — drag down at the top of any page to reload its data
+  function refreshActive(){
+    var on=document.querySelector(".navbtn.on"), v=on?on.getAttribute("data-view"):"deck";
+    if(v==="biz"){ BIZ=null; return Promise.resolve(loadBusinesses()); }
+    if(v==="out"){ return Promise.resolve(fetchOutsourced()); }
+    return Promise.all([loadLive(), loadNeeded()]);
+  }
+  (function(){
+    var ind=document.createElement("div"); ind.id="ptr";
+    ind.innerHTML='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';
+    document.body.appendChild(ind);
+    var startY=0, pulling=false, dist=0, THRESH=68, busy=false;
+    window.addEventListener("touchstart", function(e){
+      if(busy || window.scrollY>0){ pulling=false; return; }
+      startY=e.touches[0].clientY; pulling=true; dist=0; ind.classList.remove("snap");
+    }, {passive:true});
+    window.addEventListener("touchmove", function(e){
+      if(!pulling||busy) return;
+      dist=e.touches[0].clientY-startY;
+      if(dist>0 && window.scrollY<=0){
+        var d=Math.min(dist*0.5, 88);
+        ind.style.transform="translateX(-50%) translateY("+d+"px)"; ind.style.opacity=Math.min(d/THRESH,1);
+        ind.classList.toggle("ready", d>=THRESH);
+      }
+    }, {passive:true});
+    window.addEventListener("touchend", function(){
+      if(!pulling||busy){ pulling=false; return; }
+      pulling=false; ind.classList.add("snap");
+      if(dist*0.5>=THRESH){
+        busy=true; ind.classList.remove("ready"); ind.innerHTML='<span class="btnspin"></span>';
+        ind.style.transform="translateX(-50%) translateY(64px)"; ind.style.opacity="1"; hapticN("success");
+        refreshActive().then(function(){
+          setTimeout(function(){
+            ind.style.transform="translateX(-50%) translateY(-52px)"; ind.style.opacity="0";
+            setTimeout(function(){ ind.innerHTML='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>'; busy=false; }, 300);
+            toast("Refreshed","ok");
+          }, 450);
+        });
+      } else { ind.style.transform="translateX(-50%) translateY(-52px)"; ind.style.opacity="0"; }
+    }, {passive:true});
+  })();
   async function loadLive(){
     try { var r = await fetch("data.json", { cache:"no-store", headers: tgHeaders() }); if (!r.ok) return false;
       applyLive(await r.json()); return true;
@@ -1141,7 +1490,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   }
   function openApprovals(){
     if(!APPROVALS.length) return; haptic("light");
-    sheet.innerHTML = '<div class="grab"></div><h3>Needs you</h3>'+
+    sheet.innerHTML = '<div class="grab"></div><h3>Needs permission</h3>'+
       '<div class="hint" style="text-align:left;margin:2px 0 10px;">'+APPROVALS.length+' request'+(APPROVALS.length>1?'s':'')+' waiting on your call.</div>'+
       APPROVALS.map(function(b){ return '<div class="appitem" data-id="'+esc(b.id)+'"><div class="apptxt">'+esc(b.summary)+'</div>'+
         '<div class="appbtns"><button class="appbtn ok" data-d="approve">Approve</button><button class="appbtn no" data-d="reject">Reject</button></div></div>'; }).join("");
@@ -1159,10 +1508,55 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     var row=document.createElement("div"); row.className="logrow mgr";
     row.innerHTML='<span class="tm">'+ts+'</span><span class="ok">◆</span><span class="ag">You</span><span class="msg">'+esc(decision==="approve"?"approved ":"rejected ")+esc(id)+'</span>';
     body.insertBefore(row, body.firstChild);
+    toast(decision==="approve"?"Approved ✓":"Rejected", decision==="approve"?"good":"info");
     APPROVALS = APPROVALS.filter(function(x){ return x.id!==id; });
     item.remove(); renderApprovals(APPROVALS);
     if (!APPROVALS.length) closeSheet();
     if (ok) setTimeout(loadLive, 2500);
+  }
+
+  // ---------- "needed to finish" to-do list (state/needed-from-tris.json) ----------
+  var NEEDED = [];
+  function renderNeeded(){
+    var btn=$("#neededbtn"); if(!btn) return;
+    var open = NEEDED.filter(function(x){ return !x.doneAt; });
+    if(!open.length){ btn.style.display="none"; return; }
+    btn.style.display="";
+    var now = open.filter(function(x){ return x.urgency==="now"; }).length;
+    $("#neededcount").textContent = open.length + " to-do" + (open.length===1?"":"s") + (now?" · "+now+" urgent":"") + " · tap to view";
+  }
+  async function loadNeeded(){
+    try { var r = await fetch("needed.json", { cache:"no-store", headers: tgHeaders() });
+      if(r.ok){ var d = await r.json(); NEEDED = Array.isArray(d.items)?d.items:[]; renderNeeded(); } } catch(e){}
+  }
+  function openNeeded(){
+    var open = NEEDED.filter(function(x){ return !x.doneAt; });
+    if(!open.length) return; haptic("light");
+    var order={now:0,soon:1,later:2};
+    open.sort(function(a,b){ return (order[a.urgency]!==undefined?order[a.urgency]:3)-(order[b.urgency]!==undefined?order[b.urgency]:3); });
+    sheet.innerHTML = '<div class="grab"></div><h3>Needed to finish</h3>'+
+      '<div class="hint" style="text-align:left;margin:2px 0 10px;">Atom’s to-do list for you — tick an item when it’s done; Atom verifies and clears it.</div>'+
+      open.map(function(it){ return '<div class="todoitem" data-id="'+esc(it.id)+'">'+
+        '<span class="todochk" role="checkbox" aria-checked="false" tabindex="0">✓</span>'+
+        '<div class="todomid"><div class="todoven">'+esc(it.venture||"")+'</div>'+
+        '<div class="todoact">'+esc(it.action||"")+'</div>'+
+        (it.why?'<div class="todowhy">'+esc(it.why)+'</div>':'')+'</div>'+
+        '<span class="todokind '+esc(it.urgency||"")+'">'+esc(it.kind||"")+'</span></div>'; }).join("");
+    scrim.classList.add("show");
+    sheet.querySelectorAll(".todochk").forEach(function(chk){
+      chk.addEventListener("click", function(){ markNeededDone(chk.closest(".todoitem")); });
+    });
+  }
+  document.getElementById("neededbtn").addEventListener("click", openNeeded);
+  async function markNeededDone(item){
+    var id=item.getAttribute("data-id"); if(!id || item.classList.contains("done")) return;
+    item.classList.add("done"); item.querySelector(".todochk").setAttribute("aria-checked","true"); haptic("medium");
+    var ok = await apiPost("/api/needed-done", { id:id });
+    toast(ok ? "Sent — Atom will verify & clear ✓" : "Couldn’t reach Atom — try again", ok?"good":"info");
+    if(!ok){ item.classList.remove("done"); item.querySelector(".todochk").setAttribute("aria-checked","false"); return; }
+    NEEDED.forEach(function(x){ if(x.id===id) x.doneAt="pending-verify"; });
+    setTimeout(function(){ item.style.display="none"; renderNeeded();
+      if(!NEEDED.filter(function(x){ return !x.doneAt; }).length) closeSheet(); }, 700);
   }
 
   // ---------- per-agent enable/disable ----------
@@ -1170,6 +1564,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     var a = state.agents.filter(function(x){ return x.id===id; })[0]; if (!a) return;
     var want = !a.enabled; a.enabled = want; haptic("light");
     renderAgents(); renderCore();
+    toast((a.name||"Agent")+(want?" enabled":" disabled"), want?"good":"info");
     if (LIVE){ var ok = await apiPost("/api/agent", { id:id, enabled:want }); if (ok) setTimeout(loadLive, 1500); }
     else { save(); }
   }
@@ -1187,11 +1582,13 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     body.insertBefore(row, body.firstChild);
     input.value=""; haptic("medium");
     hint.className="cmdhint"; hint.textContent="Sending…";
+    var btn=$("#cmdsend"), inner=btn.innerHTML; btn.setAttribute("aria-busy","true"); btn.innerHTML='<span class="btnspin"></span>';
     var ok = await apiPost("/api/command", { text: text });
+    btn.removeAttribute("aria-busy"); btn.innerHTML=inner;
     hint.className = "cmdhint sent";
-    if (ok){ hint.textContent = "Sent ✓ — Atom runs it on its next tick."; setTimeout(loadLive, 1500); }
+    if (ok){ hint.textContent = "Sent ✓ — Atom runs it on its next tick."; flashOk(btn); toast("Command sent — Atom runs it next tick", "ok"); setTimeout(loadLive, 1500); }
     else { queueCommand({ type:"atom-command", text:text, at:new Date().toISOString() }, "command");
-           hint.textContent = "Queued — no VPS link yet (demo mode)."; }
+           hint.textContent = "Queued — no VPS link yet (demo mode)."; toast("Queued — no live link (demo)", "info"); }
   }
   $("#cmdsend").addEventListener("click", sendCommand);
   $("#cmdinput").addEventListener("keydown", function(e){ if (e.key==="Enter"){ e.preventDefault(); sendCommand(); } });
@@ -1210,7 +1607,8 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     var ok = await apiPost("/api/control", { action: want ? "resume" : "pause" });
     if (ok){ state.power = want; renderCore();
       $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
-      $("#coresub").innerHTML = "Atom " + (want ? "resuming" : "pausing") + "…"; setTimeout(loadLive, 1500); }
+      $("#coresub").innerHTML = "Atom " + (want ? "resuming" : "pausing") + "…";
+      toast(want ? "Atom resuming — work starting" : "Atom paused", want ? "good" : "info"); setTimeout(loadLive, 1500); }
     else { queueCommand({ type:"atom-control", action: want?"resume":"pause", at:new Date().toISOString() }, "control");
       state.power = want; renderCore();
       $("#coresub").innerHTML = "queued — no VPS link yet"; }
@@ -1286,7 +1684,7 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
     if (name==="detail"){ if(pager) pager.style.display="none"; detail.hidden=false; }
     else {
       detail.hidden=true;
-      if(pager){ pager.style.display="flex"; var idx=(name==="biz")?1:0;
+      if(pager){ pager.style.display="flex"; var idx=(name==="out")?2:(name==="biz")?1:0;
         try{ pager.scrollTo({left:idx*pager.clientWidth, behavior:"smooth"}); }
         catch(e){ pager.scrollLeft=idx*pager.clientWidth; }
       }
@@ -1299,16 +1697,90 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
       if(raf) cancelAnimationFrame(raf);
       raf=requestAnimationFrame(function(){
         if(!document.getElementById("view-detail").hidden) return;
-        var i=Math.round(pager.scrollLeft/pager.clientWidth), name=(i>=1)?"biz":"deck";
+        var i=Math.round(pager.scrollLeft/pager.clientWidth), name=["deck","biz","out"][i]||"deck";
         setNavOn(name);
         if(name==="biz" && !BIZ) loadBusinesses();
+        if(name==="out") loadOutsourced();
       });
     }, {passive:true});
   })();
   document.querySelectorAll(".navbtn").forEach(function(b){
-    b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); haptic("light"); showView(v); if(v==="biz") loadBusinesses(); });
+    b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); haptic("light"); showView(v); if(v==="biz") loadBusinesses(); if(v==="out") loadOutsourced(); });
   });
   $("#bizback").addEventListener("click", function(){ haptic("light"); showView("biz"); });
+
+  // ---------- outsourced (free-tier LLM router) ----------
+  var OUT=null, outTimer=null;
+  function outActive(){ var b=document.querySelector('.navbtn[data-view="out"]'); return b && b.classList.contains("on"); }
+  async function fetchOutsourced(){
+    try{
+      var r=await fetch("outsourced.json",{cache:"no-store",headers:tgHeaders()});
+      if(!r.ok) throw new Error("http "+r.status);
+      OUT=await r.json(); renderOutsourced(OUT); return true;
+    }catch(e){
+      if(!OUT){ $("#oprovlist").innerHTML='<div class="bizloading">Open inside Telegram to load router telemetry.</div>';
+        $("#oproxy").className="card proxycard down"; $("#oproxy").innerHTML='<span class="pdot"></span><div><div class="ph">Proxy status unavailable</div><div class="pu">open inside Telegram</div></div><span class="pstat">—</span>'; }
+      return false;
+    }
+  }
+  function loadOutsourced(){
+    fetchOutsourced();
+    if(!outTimer){ outTimer=setInterval(function(){ if(outActive() && !document.hidden) fetchOutsourced(); }, 7000); }
+  }
+  function outGraph(series){
+    var n=series.length, W=300, H=96, pad=8;
+    var max=Math.max.apply(null, series.map(function(s){return s.tokens;}).concat([1]));
+    var pts=series.map(function(s,i){
+      var x=n<2?0:(i/(n-1))*W;
+      var y=H-pad-(s.tokens/max)*(H-pad*2);
+      return [x, Math.max(pad, Math.min(H-pad, y))];
+    });
+    var line=pts.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1); }).join(" ");
+    var area=line+" L "+W+" "+H+" L 0 "+H+" Z";
+    $("#oline").setAttribute("d", line);
+    $("#oarea").setAttribute("d", area);
+    var last=pts[pts.length-1]; $("#oendpt").setAttribute("cx",last[0].toFixed(1)); $("#oendpt").setAttribute("cy",last[1].toFixed(1));
+    // 3 faint horizontal gridlines
+    var g=""; [0.25,0.5,0.75].forEach(function(f){ var y=(H*f).toFixed(0); g+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'"/>'; });
+    $("#ogrid").innerHTML=g;
+  }
+  function renderOutsourced(d){
+    // hero strip
+    $("#ostat").innerHTML=
+      '<div class="ob"><div class="ov cy tabnum">'+fmt(d.today.tokens)+'</div><div class="ok2">tokens today</div></div>'+
+      '<div class="ob"><div class="ov tabnum">'+fmt(d.today.ok)+'</div><div class="ok2">calls ok</div></div>'+
+      '<div class="ob"><div class="ov tabnum">'+d.providersOnline+'<span style="color:var(--ink-mut);font-size:15px">/'+d.providersTotal+'</span></div><div class="ok2">providers</div></div>';
+    // graph
+    $("#otok").textContent=fmt((d.series||[]).reduce(function(a,s){return a+s.tokens;},0));
+    var lastH=(d.series&&d.series.length)?d.series[d.series.length-1].tokens:0;
+    var rate=$("#orate"); if(lastH>0){ rate.className="rate tabnum"; rate.textContent="▲ "+fmt(lastH)+" / h"; } else { rate.className="rate idle tabnum"; rate.textContent="— idle"; }
+    outGraph(d.series||[]);
+    // proxy
+    var px=d.proxy||{up:false}; var pc=$("#oproxy"); pc.className="card proxycard "+(px.up?"up":"down");
+    pc.innerHTML='<span class="pdot"></span><div><div class="ph">Router proxy '+(px.up?"live":"down")+'</div><div class="pu">'+esc(px.url||"http://127.0.0.1:8899/v1")+'</div></div><span class="pstat">'+(px.up?"online":"offline")+'</span>';
+    // providers
+    var maxTok=Math.max.apply(null,(d.providers||[]).map(function(p){return p.tokens;}).concat([1]));
+    var tags={live:"LIVE",ready:"READY",error:"RATE-LIMIT",nokey:"NO KEY"};
+    $("#oprovlist").innerHTML=(d.providers||[]).map(function(p,i){
+      var pct=Math.round((p.tokens/maxTok)*100);
+      return '<div class="oprow '+p.status+'"><div class="ostrip"></div>'+
+        '<div class="otop"><span class="onm">'+esc(p.name)+'</span><span class="otag">'+(tags[p.status]||p.status)+'</span><span class="ordr">#'+(i+1)+' in order</span></div>'+
+        '<div class="omdl">'+esc(p.model)+'</div>'+
+        '<div class="ohint">'+esc(p.hint)+'</div>'+
+        (p.hasKey?'<div class="obar"><i style="width:'+pct+'%"></i></div>':'')+
+        '<div class="ostats"><span>ok <b>'+fmt(p.ok)+'</b></span><span class="'+(p.fail?"bad":"")+'">fail <b>'+fmt(p.fail)+'</b></span><span>tok <b>'+fmt(p.tokens)+'</b></span></div>'+
+        (p.lastError?'<div class="oerr">last: '+esc(p.lastError)+'</div>':'')+
+      '</div>';
+    }).join("");
+    // feed
+    var fb=$("#ofeed"); var rec=d.recent||[];
+    if(!rec.length){ fb.innerHTML='<div class="empty">Waiting for routed calls…</div>'; }
+    else { fb.innerHTML=rec.map(function(r){
+      return '<div class="ofeedrow"><span class="fd'+(r.ok?"":" bad")+'"></span><span class="fp">'+esc(r.provider)+'</span>'+
+        '<span class="fk">'+(r.ok?fmt(r.tokens)+" tok":esc((r.error||"failed").slice(0,22)))+'</span>'+
+        '<span class="ft">'+fmtClock((r.ts||"").replace(" ","T"))+'</span></div>';
+    }).join(""); }
+  }
 
   async function loadBusinesses(){
     if (BIZ){ renderBizList(); return; }
@@ -1499,6 +1971,9 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
   // attach to the real Atom if a data feed is present; otherwise the demo above stands
   loadLive();
   setInterval(loadLive, 30000);
+  loadBuildLinks(); setInterval(loadBuildLinks, 60000);
+  loadFunctions(); setInterval(loadFunctions, 60000);
+  loadNeeded(); setInterval(loadNeeded, 60000);
 })();
 </script>
 

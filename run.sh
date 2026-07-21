@@ -13,5 +13,5 @@ pgrep -f "tailscaled --tun=userspace-networking" >/dev/null 2>&1 || \
     --socket="$SOCK" >/tmp/tailscaled.log 2>&1 &
 
 # 2. app server (Telegram-auth API + dashboard) on localhost
-pgrep -f "node .*agent-deck/server.js" >/dev/null 2>&1 || \
-  ( cd /home/tris/agent-deck && nohup node server.js >/tmp/agentdeck-server.log 2>&1 & )
+pgrep -f "node /home/tris/agent-deck/server.js" >/dev/null 2>&1 || \
+  ( cd /home/tris/agent-deck && nohup node /home/tris/agent-deck/server.js >/tmp/agentdeck-server.log 2>&1 & )
