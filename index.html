@@ -804,7 +804,10 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
 
 .orbx-system{ position:relative; width:min(94vw,420px); aspect-ratio:1/1; margin:14px auto 6px; }
 .orbx-spokes{ position:absolute; inset:0; opacity:.5; }
-.orbx-path{ position:absolute; top:50%; left:50%; border-radius:50%; border:1px solid rgba(46,230,255,.1); }
+/* The translate is load-bearing: top/left:50% place the ring's TOP-LEFT corner at the
+   centre, so without it a 344px orbit is drawn from the middle outward and spills 293px
+   past the stage — that was the giant arc sweeping down across the Functions list. */
+.orbx-path{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; border:1px solid rgba(46,230,255,.1); }
 
 @keyframes orbxSpinCW{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 @keyframes orbxSpinCCW{ from{transform:rotate(0deg);} to{transform:rotate(-360deg);} }
@@ -847,7 +850,22 @@ body.orbx-sheet-open .orbx-ring, body.orbx-sheet-open .orbx-face{ animation-play
 .orbx-cap .cs{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.8px; margin-top:2px; white-space:nowrap; color:var(--cyan-lt); font-size:7.5px; }
 .orbx-cap .cs.flag{ color:var(--red-lt); }
 .orbx-cap.red .cs{ color:var(--red-lt); }
+/* The core label hangs BELOW the centre, which is exactly where ring 1's two lower orbs
+   put their own captions — "Obsidian Nucleus / Live" was printing on top of
+   "Capital Markets / Needs attention". Park it at the foot of the stage instead, clear
+   of every orbit: ring 3 stops at r=172 and its captions are hidden, ring 2's only
+   appear on hover. */
+.orbx-sz-core .orbx-cap{ position:absolute; top:178px; left:50%; transform:translateX(-50%); }
 .orbx-sz-core .orbx-cap .cn{ font-size:13px; } .orbx-sz-core .orbx-cap .cs{ font-size:8px; color:var(--ink-mut); text-transform:none; letter-spacing:.3px; }
+/* A long agent name at the rim would otherwise push past the stage edge. Cap it, but at
+   a width that still fits real names — 104px truncated "Atom morning check-in". */
+.orbx-cap .cn, .orbx-cap .cs{ max-width:140px; overflow:hidden; text-overflow:ellipsis; }
+.orbx-sz-core .orbx-cap .cn, .orbx-sz-core .orbx-cap .cs{ max-width:none; }
+/* The rings never stop turning, so an orb WILL pass behind a label sooner or later —
+   that's the design, not a bug. Labels therefore have to stay readable against a bright
+   orb, not merely against the background. */
+.orbx-cap .cn{ text-shadow:0 1px 3px rgba(2,10,16,.95), 0 0 8px rgba(2,10,16,.8); }
+.orbx-cap .cs{ text-shadow:0 1px 3px rgba(2,10,16,.95); }
 .orbx-sz-3 .orbx-cap{ display:none; }
 
 .orbx-hide-cap .orbx-cap{ opacity:0; transition:opacity .15s ease; }
