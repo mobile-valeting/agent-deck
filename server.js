@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
+const sys = require('./system');
 
 const PORT        = Number(process.env.PORT || 8787);
 const HOST        = process.env.HOST || '127.0.0.1';
@@ -44,6 +45,7 @@ function verifyInitData(initData) {
   return { ok: true, user };
 }
 let lastLoggedUser = null;
+const leadHits = new Map(); // ip -> [timestamps] for /api/lead rate limiting
 function auth(req) {
   if (DEV_NO_AUTH) return { ok: true, user: { id: 'dev' } };
   const r = verifyInitData(String(req.headers['x-telegram-init-data'] || ''));
@@ -188,7 +190,11 @@ const server = http.createServer(async (req, res) => {
   if (p === '/businesses.json') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
     try { const d = fs.readFileSync(path.join(ATOM, 'state', 'businesses.json'), 'utf8');
-      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(d); }
+      // Normalise progress to a number — the worker sometimes writes it quoted
+      // ("54"), which turns the dashboard's sum into string concatenation.
+      const obj = JSON.parse(d);
+      if (Array.isArray(obj.businesses)) obj.businesses.forEach(b => { b.progress = Number(b.progress) || 0; });
+      res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(JSON.stringify(obj)); }
     catch { return sendJSON(res, 404, { error: 'no businesses.json' }); }
   }
 
@@ -271,6 +277,59 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, { ok: true, id });
   }
 
+  // ---- System control: crons, services, maintenance, spend, backlog ---------
+  // All of this was SSH-only until now. Reads are cheap and safe; every write is
+  // narrow (a specific id + an enum), never free-form, because this surface is driven
+  // from a phone and the files behind it corrupt badly.
+  if (p === '/system.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    const [crons, services] = await Promise.all([sys.listCrons(), sys.listServices()]);
+    return sendJSON(res, 200, {
+      crons, services, maintenance: sys.listMaintenance(), backlog: sys.listBacklog(),
+    });
+  }
+
+  if (p === '/spend.json') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    return sendJSON(res, 200, await sys.spend());
+  }
+
+  if (p === '/api/cron' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    if (!j.id) return sendJSON(res, 400, { error: 'need id' });
+    const r = await sys.toggleCron(String(j.id), j.enable === true);
+    return sendJSON(res, r.ok ? 200 : 400, r);
+  }
+
+  if (p === '/api/service' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const r = await sys.serviceAction(String(j.id || ''), String(j.action || ''));
+    return sendJSON(res, r.ok ? 200 : 400, r);
+  }
+
+  if (p === '/api/maintenance' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const r = await sys.runMaintenance(String(j.id || ''));
+    return sendJSON(res, r.ok ? 200 : 400, r);
+  }
+
+  if (p === '/api/worker-model' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const r = sys.setWorkerModel(String(j.model || ''));
+    return sendJSON(res, r.ok ? 200 : 400, r);
+  }
+
+  if (p === '/api/backlog' && req.method === 'POST') {
+    const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    const r = sys.updateBacklog({ id: j.id, status: j.status, priority: j.priority });
+    return sendJSON(res, r.ok ? 200 : 400, r);
+  }
+
   if (p === '/api/approve' && req.method === 'POST') {
     const a = auth(req); if (!a.ok) return sendJSON(res, 401, { error: a.reason });
     let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
@@ -301,6 +360,42 @@ const server = http.createServer(async (req, res) => {
       if (action === 'resume') kickWorker();
       return sendJSON(res, 200, { ok: true, action, out: String(so).trim() });
     });
+  }
+
+  // ---- Public lead capture (unauthenticated on purpose — fed by public venture
+  // sites, e.g. the valeting location-page network on GitHub Pages) ----------
+  if (p === '/api/lead' && req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'POST, OPTIONS',
+      'access-control-allow-headers': 'content-type',
+    });
+    return res.end();
+  }
+  if (p === '/api/lead' && req.method === 'POST') {
+    res.setHeader('access-control-allow-origin', '*');
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+    const now = Date.now();
+    leadHits.set(ip, (leadHits.get(ip) || []).filter(t => now - t < 3600e3));
+    if (leadHits.get(ip).length >= 5) return sendJSON(res, 429, { error: 'too many requests, try again later' });
+    let j = {}; try { j = JSON.parse(await readBody(req) || '{}'); } catch {}
+    if (j.hp) return sendJSON(res, 200, { ok: true }); // honeypot tripped — pretend success, drop silently
+    const name = String(j.name || '').trim().slice(0, 100);
+    const contact = String(j.phone || j.email || '').trim().slice(0, 100);
+    const venture = String(j.venture || 'unknown').trim().slice(0, 60);
+    const town = String(j.town || '').trim().slice(0, 60);
+    const message = String(j.message || '').trim().slice(0, 1000);
+    if (!name || !contact) return sendJSON(res, 400, { error: 'name and phone/email required' });
+    leadHits.get(ip).push(now);
+    const lead = { ts: new Date().toISOString(), venture, town, name, contact, message, ip };
+    try { fs.appendFileSync(path.join(ATOM, 'state', 'leads.jsonl'), JSON.stringify(lead) + '\n'); }
+    catch (e) { return sendJSON(res, 500, { error: 'write failed' }); }
+    try {
+      const { sendMessage } = require(path.join(ATOM, 'notify.js'));
+      sendMessage(`🧽 New lead [${venture}${town ? '/' + town : ''}]: ${name} — ${contact}${message ? '\n"' + message + '"' : ''}`)
+        .catch(() => {}); // best-effort — lead is already saved to disk either way
+    } catch {}
+    return sendJSON(res, 200, { ok: true });
   }
 
   // static files (dashboard)

@@ -47,6 +47,11 @@
     --danger-sft: rgba(255,93,108,.12);
     --steel:     #7fb2ff;
     --steel-sft: rgba(127,178,255,.12);
+    /* orbit view — deep dark cyan, original bright cyan only as a mild glow accent;
+       deep blood red reserved for idle/broken. Namespaced orbx-* below so nothing
+       here can collide with the existing card/grid styles above. */
+    --cyan-lt:#2ee6ff; --cyan-1:#1fa3bd; --cyan-1-dk:#0c5f72; --cyan-2:#167e94; --cyan-2-dk:#073e4a; --cyan-3:#0d5666; --cyan-3-dk:#04232b;
+    --red-lt:#e0273a; --red-1:#c33245; --red-1-dk:#720d18; --red-2:#9c2131; --red-2-dk:#4c0810;
     /* graph */
     --graph:     var(--accent);
     --graph-a:   rgba(46,230,255,.26);
@@ -649,6 +654,13 @@ body::after{ width:64vw; height:64vw; max-width:360px; max-height:360px; bottom:
 .todomid{ flex:1; min-width:0; }
 .todoven{ font-family:var(--mono); font-size:8.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); }
 .todoact{ font-size:12.5px; font-weight:600; line-height:1.45; margin-top:2px; }
+/* System-control affordance. Borrows .todokind's pill geometry so the control surface
+   reads as part of the deck rather than a bolted-on admin panel. */
+.sysbtn{ font-family:var(--mono); font-size:9px; letter-spacing:.8px; text-transform:uppercase;
+  padding:5px 9px; margin:2px 1px; border-radius:999px; border:1px solid var(--border);
+  background:transparent; color:var(--ink); cursor:pointer; flex:0 0 auto; }
+.sysbtn:active{ border-color:var(--accent); color:var(--accent); }
+.sysbtn[disabled]{ opacity:.5; }
 .todowhy{ font-size:10.5px; color:var(--ink-mut); line-height:1.5; margin-top:3px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .todokind{ flex:0 0 auto; font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; padding:2.5px 7px; border-radius:999px; border:1px solid var(--border); color:var(--ink-mut); margin-top:2px; }
 .todokind.now{ color:var(--warn); border-color:rgba(255,194,71,.4); }
@@ -781,6 +793,72 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
 @keyframes corebreathe { 0%,100%{ opacity:.78; } 50%{ opacity:1; } }
 .core.on .powerbtn .glyph{ animation: corebreathe 2.1s ease-in-out infinite; }
 @media (prefers-reduced-motion:reduce){ .core.on .powerbtn .glyph{ animation:none; } #ptr.snap{ transition:opacity .2s ease; } }
+
+/* ============================================================
+   ORBIT VIEW — replaces the old stacked command-chain/workers/
+   micro-bots cards. Namespaced orbx-* throughout so nothing here
+   can collide with the rules above. Data-driven: ring2 (workers)
+   and ring3 (micro bots) are laid out by JS from live counts.
+   ============================================================ */
+.legacy-hidden{ display:none; }
+
+.orbx-system{ position:relative; width:min(94vw,420px); aspect-ratio:1/1; margin:14px auto 6px; }
+.orbx-spokes{ position:absolute; inset:0; opacity:.5; }
+.orbx-path{ position:absolute; top:50%; left:50%; border-radius:50%; border:1px solid rgba(46,230,255,.1); }
+
+@keyframes orbxSpinCW{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+@keyframes orbxSpinCCW{ from{transform:rotate(0deg);} to{transform:rotate(-360deg);} }
+@keyframes orbxCounterCW{ from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(-360deg);} }
+@keyframes orbxCounterCCW{ from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(360deg);} }
+
+.orbx-ring{ position:absolute; inset:0; animation:orbxSpinCW var(--dur) linear infinite; }
+.orbx-ring.ccw{ animation-name:orbxSpinCCW; }
+body.orbx-sheet-open .orbx-ring, body.orbx-sheet-open .orbx-face{ animation-play-state:paused; }
+.orbx-slot{ position:absolute; top:50%; left:50%; width:0; height:0; transform:translate(var(--x), var(--y)); }
+.orbx-face{ position:absolute; top:0; left:0; animation:orbxCounterCW var(--dur) linear infinite; display:flex; flex-direction:column; align-items:center; }
+.orbx-ring.ccw .orbx-face{ animation-name:orbxCounterCCW; }
+@media (prefers-reduced-motion: reduce){ .orbx-ring,.orbx-face{ animation:none !important; } }
+
+.orbx-orb{ position:relative; display:grid; place-items:center; width:var(--orb); height:var(--orb); }
+.orbx-glow{ position:absolute; top:50%; left:50%; width:var(--glowsz); height:var(--glowsz); transform:translate(-50%,-50%); border-radius:50%; filter:blur(8px); opacity:.3; z-index:0; }
+.orbx-body{ position:relative; z-index:1; cursor:pointer; transition:transform .18s cubic-bezier(.2,.8,.3,1); border-radius:50%; width:var(--h); height:var(--h); -webkit-tap-highlight-color:transparent; }
+.orbx-body:hover, .orbx-body:active{ transform:scale(1.08); }
+
+.orbx-sz-1{ --orb:56px; --glowsz:50px; } .orbx-sz-1 .orbx-body{ --h:40px; }
+.orbx-sz-2{ --orb:46px; --glowsz:40px; } .orbx-sz-2 .orbx-body{ --h:34px; }
+.orbx-sz-3{ --orb:32px; --glowsz:26px; } .orbx-sz-3 .orbx-body{ --h:24px; }
+.orbx-sz-core{ --orb:78px; --glowsz:110px; }
+
+.orbx-g-cyan-1{ background:radial-gradient(circle, rgba(180,250,255,.9) 0%, rgba(46,230,255,.55) 32%, transparent 72%); }
+.orbx-g-cyan-2{ background:radial-gradient(circle, rgba(150,244,255,.85) 0%, rgba(46,230,255,.45) 32%, transparent 72%); }
+.orbx-g-cyan-3{ background:radial-gradient(circle, rgba(110,220,235,.7) 0%, rgba(46,230,255,.3) 32%, transparent 72%); }
+.orbx-g-red-1{ background:radial-gradient(circle, rgba(255,170,178,.85) 0%, rgba(224,39,58,.5) 32%, transparent 72%); }
+.orbx-g-red-2{ background:radial-gradient(circle, rgba(255,140,150,.8) 0%, rgba(224,39,58,.4) 32%, transparent 72%); }
+
+.orbx-b-cyan-1{ background:linear-gradient(165deg, var(--cyan-lt) 0%, var(--cyan-1) 48%, var(--cyan-1-dk) 100%); border:1.5px solid rgba(150,240,255,.42); box-shadow:0 0 11px rgba(46,230,255,.28); }
+.orbx-b-cyan-2{ background:linear-gradient(165deg, #167e94 0%, var(--cyan-2) 48%, var(--cyan-2-dk) 100%); border:1.5px solid rgba(150,240,255,.28); box-shadow:0 0 8px rgba(46,230,255,.2); }
+.orbx-b-cyan-3{ background:linear-gradient(165deg, #0d5666 0%, var(--cyan-3) 48%, var(--cyan-3-dk) 100%); border:1.5px solid rgba(150,240,255,.16); box-shadow:0 0 6px rgba(46,230,255,.12); }
+.orbx-b-red-1{ background:linear-gradient(165deg, #c93142 0%, var(--red-1) 48%, var(--red-1-dk) 100%); border:1.5px solid rgba(255,175,182,.42); box-shadow:0 0 11px rgba(224,39,58,.32); }
+.orbx-b-red-2{ background:linear-gradient(165deg, #9c2131 0%, var(--red-2) 48%, var(--red-2-dk) 100%); border:1.5px solid rgba(255,175,182,.28); box-shadow:0 0 8px rgba(224,39,58,.24); }
+
+.orbx-cap{ margin-top:7px; text-align:center; pointer-events:none; }
+.orbx-cap .cn{ font-family:var(--sans); font-weight:650; color:#c9eef8; white-space:nowrap; font-size:10.5px; }
+.orbx-cap.red .cn{ color:#f8ced2; }
+.orbx-cap .cs{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.8px; margin-top:2px; white-space:nowrap; color:var(--cyan-lt); font-size:7.5px; }
+.orbx-cap .cs.flag{ color:var(--red-lt); }
+.orbx-cap.red .cs{ color:var(--red-lt); }
+.orbx-sz-core .orbx-cap .cn{ font-size:13px; } .orbx-sz-core .orbx-cap .cs{ font-size:8px; color:var(--ink-mut); text-transform:none; letter-spacing:.3px; }
+.orbx-sz-3 .orbx-cap{ display:none; }
+
+.orbx-hide-cap .orbx-cap{ opacity:0; transition:opacity .15s ease; }
+.orbx-hide-cap .orbx-orb:hover + .orbx-cap{ opacity:1; }
+
+.orbx-core-wrap{ display:flex; flex-direction:column; align-items:center; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.orbx-nucleus{ cursor:pointer; transition:transform .2s ease; position:relative; z-index:1; display:block; -webkit-tap-highlight-color:transparent; }
+.orbx-nucleus:hover, .orbx-nucleus:active{ transform:scale(1.04); }
+
+.orbx-legend{ display:flex; gap:14px; flex-wrap:wrap; padding:2px 4px; font-family:var(--mono); font-size:9.5px; color:var(--ink-mut); align-items:center; }
+.orbx-legend .d{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -832,6 +910,12 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     <span class="needchev">›</span>
   </button>
 
+  <button class="needbtn" id="systembtn">
+    <span class="needbang">⚙</span>
+    <span class="needtxt"><b>System control</b><span class="needsub" id="systemsub">crons · services · spend · maintenance</span></span>
+    <span class="needchev">›</span>
+  </button>
+
   <button class="needbtn" id="approvals" style="display:none;">
     <span class="needbang">!</span>
     <span class="needtxt"><b>Needs permission</b><span class="needsub" id="appcount">0 pending</span></span>
@@ -867,7 +951,71 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     </div>
   </div>
 
-  <div class="sec c-cyan"><h2>Command chain</h2><span class="seclabel">CEO · CFO · WORKERS</span></div>
+  <div class="sec c-cyan"><h2>System</h2><span class="seclabel">CORE · COMMAND · WORKERS · MICRO BOTS</span></div>
+  <div class="orbx-system" id="orbxSystem">
+    <svg class="orbx-spokes" viewBox="0 0 420 420">
+      <g stroke="rgba(46,230,255,.1)" stroke-width="1">
+        <line x1="210" y1="210" x2="210" y2="30"/><line x1="210" y1="210" x2="345" y2="75"/>
+        <line x1="210" y1="210" x2="390" y2="210"/><line x1="210" y1="210" x2="345" y2="345"/>
+        <line x1="210" y1="210" x2="210" y2="390"/><line x1="210" y1="210" x2="75" y2="345"/>
+        <line x1="210" y1="210" x2="30" y2="210"/><line x1="210" y1="210" x2="75" y2="75"/>
+      </g>
+    </svg>
+    <div class="orbx-path" style="width:152px;height:152px;"></div>
+    <div class="orbx-path" style="width:256px;height:256px;"></div>
+    <div class="orbx-path" style="width:344px;height:344px;"></div>
+
+    <div class="orbx-ring" style="--dur:90s">
+      <div class="orbx-slot" style="--x:0px; --y:-76px"><div class="orbx-face" style="--dur:90s">
+        <div class="orbx-orb orbx-sz-1"><div class="orbx-glow orbx-g-cyan-1" id="orbxNeuronGlow"></div><div class="orbx-body orbx-b-cyan-1" id="orbxNeuron"></div></div>
+        <div class="orbx-cap"><div class="cn">Neuron</div><div class="cs" id="orbxNeuronStatus">Working</div></div>
+      </div></div>
+      <div class="orbx-slot" style="--x:65.8px; --y:38px"><div class="orbx-face" style="--dur:90s">
+        <div class="orbx-orb orbx-sz-1"><div class="orbx-glow orbx-g-red-1" id="orbxOverseerGlow"></div><div class="orbx-body orbx-b-red-1" id="orbxOverseer"></div></div>
+        <div class="orbx-cap red"><div class="cn">Overseer</div><div class="cs" id="orbxOverseerStatus">Idle</div></div>
+      </div></div>
+      <div class="orbx-slot" style="--x:-65.8px; --y:38px"><div class="orbx-face" style="--dur:90s">
+        <div class="orbx-orb orbx-sz-1"><div class="orbx-glow orbx-g-cyan-1"></div><div class="orbx-body orbx-b-cyan-1" id="orbxCapMkt"></div></div>
+        <div class="orbx-cap"><div class="cn">Capital Markets</div><div class="cs flag">Needs attention</div></div>
+      </div></div>
+    </div>
+
+    <div class="orbx-ring ccw orbx-hide-cap" id="orbxRingWorkers" style="--dur:150s"></div>
+    <div class="orbx-ring orbx-hide-cap" id="orbxRingMicro" style="--dur:210s"></div>
+
+    <div class="orbx-core-wrap orbx-sz-core">
+      <svg class="orbx-nucleus" id="orbxNucleus" width="78" height="78" viewBox="0 0 220 220">
+        <defs>
+          <radialGradient id="orbxBallGrad" cx="35%" cy="30%" r="72%">
+            <stop offset="0%" stop-color="#eafeff"/><stop offset="30%" stop-color="#8de7f7"/>
+            <stop offset="62%" stop-color="#1a9fbd"/><stop offset="100%" stop-color="#062f3b"/>
+          </radialGradient>
+          <radialGradient id="orbxAmbient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7deeff" stop-opacity=".26"/><stop offset="100%" stop-color="#7deeff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="110" cy="110" r="104" fill="url(#orbxAmbient)"/>
+        <g stroke="rgba(170,235,255,.28)" stroke-width="1" fill="none">
+          <ellipse cx="110" cy="110" rx="58" ry="58"/><ellipse cx="110" cy="110" rx="58" ry="23"/><ellipse cx="110" cy="110" rx="58" ry="41"/>
+          <ellipse cx="110" cy="110" rx="23" ry="58"/><ellipse cx="110" cy="110" rx="41" ry="58" transform="rotate(45 110 110)"/><ellipse cx="110" cy="110" rx="41" ry="58" transform="rotate(-45 110 110)"/>
+        </g>
+        <circle cx="110" cy="110" r="46" fill="url(#orbxBallGrad)" opacity=".93"/>
+        <g transform="rotate(0 110 110)"><ellipse cx="110" cy="110" rx="100" ry="36" fill="none" stroke="rgba(125,238,255,.4)" stroke-width="1.3"/>
+          <circle r="3.2" fill="#eafeff"><animateMotion dur="15s" repeatCount="indefinite" path="M210,110 A100,36 0 1,1 10,110 A100,36 0 1,1 210,110"/></circle></g>
+        <g transform="rotate(60 110 110)"><ellipse cx="110" cy="110" rx="100" ry="36" fill="none" stroke="rgba(125,238,255,.24)" stroke-width="1.1"/></g>
+        <g transform="rotate(120 110 110)"><ellipse cx="110" cy="110" rx="100" ry="36" fill="none" stroke="rgba(125,238,255,.24)" stroke-width="1.1"/></g>
+        <circle cx="110" cy="110" r="9" fill="#f2ffff"/>
+      </svg>
+      <div class="orbx-cap"><div class="cn">Obsidian Nucleus</div><div class="cs" id="orbxNucleusSub">Live</div></div>
+    </div>
+  </div>
+  <div class="orbx-legend">
+    <span><span class="d" style="background:var(--cyan-lt)"></span>operating</span>
+    <span><span class="d" style="background:var(--red-lt)"></span>idle / broken</span>
+    <button class="addbtn" id="addtop2" style="margin-left:auto">+ New worker</button>
+  </div>
+
+  <div class="legacy-hidden">
   <div class="card mgr neuron" id="neuroncard">
     <div class="strip"></div>
     <div class="in">
@@ -920,6 +1068,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
 
   <div class="sec c-steel" id="microsechead" hidden><h2>Micro bots</h2><span class="seclabel">PASSIVE · DETERMINISTIC</span></div>
   <div class="microgrid" id="microgrid" hidden></div>
+  </div><!-- /legacy-hidden -->
 
   <div class="sec c-cyan"><h2>Functions</h2><span class="seclabel" id="funcount">CONTROL DECK</span></div>
   <div class="functions" id="functions"></div>
@@ -1100,6 +1249,37 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     add.innerHTML = '<div class="plus">+</div><div class="txt">Add worker</div>';
     add.addEventListener("click", function(){ haptic("light"); openAdd(); });
     grid.appendChild(add);
+    renderOrbitWorkers();
+  }
+
+  // ---------- orbit view: dynamic ring layout ----------
+  function orbxPos(i, n, r){
+    var ang = (-90 + i * (360/n)) * Math.PI/180;
+    return { x: (r*Math.cos(ang)).toFixed(1), y: (r*Math.sin(ang)).toFixed(1) };
+  }
+  function orbxNode(x, y, dur, sz, glowClass, bodyClass, name, statusTxt, statusClass, onClick){
+    var slot=document.createElement("div"); slot.className="orbx-slot"; slot.style.cssText="--x:"+x+"px;--y:"+y+"px";
+    var face=document.createElement("div"); face.className="orbx-face"; face.style.setProperty("--dur", dur);
+    var orb=document.createElement("div"); orb.className="orbx-orb "+sz;
+    var glow=document.createElement("div"); glow.className="orbx-glow "+glowClass;
+    var body=document.createElement("div"); body.className="orbx-body "+bodyClass;
+    body.addEventListener("click", onClick);
+    orb.appendChild(glow); orb.appendChild(body);
+    var cap=document.createElement("div"); cap.className="orbx-cap"+(statusClass==="red"?" red":"");
+    cap.innerHTML='<div class="cn">'+esc(name)+'</div><div class="cs'+(statusClass==="flag"?" flag":"")+'">'+esc(statusTxt||"")+'</div>';
+    face.appendChild(orb); face.appendChild(cap); slot.appendChild(face);
+    return slot;
+  }
+  function renderOrbitWorkers(){
+    var ring=$("#orbxRingWorkers"); if(!ring) return; ring.innerHTML="";
+    var items = sorted();
+    items.forEach(function(a, i){
+      var pos = orbxPos(i, items.length, 128);
+      var active = state.power && a.enabled;
+      var tone = a.enabled ? "cyan-2" : "red-2";
+      var stTxt = active ? "Working" : (a.enabled ? "Ready" : "Idle");
+      ring.appendChild(orbxNode(pos.x, pos.y, "150s", "orbx-sz-2", "orbx-g-"+tone, "orbx-b-"+tone, a.name, stTxt, a.enabled?"":"red", function(){ haptic("light"); openDetail(a.id); }));
+    });
   }
 
   function renderCore(){
@@ -1134,6 +1314,13 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     else if (state.mgr.enabled) t = "Autonomous — auditing "+SYSTEMS.length+" systems overnight";
     else t = "Off — flip on for hands-off fixing";
     $("#ovstatetxt").textContent = t;
+    var ob=$("#orbxOverseer"), og=$("#orbxOverseerGlow"), os=$("#orbxOverseerStatus");
+    if (ob){
+      ob.className = "orbx-body " + (active ? "orbx-b-cyan-1" : "orbx-b-red-1");
+      og.className = "orbx-glow " + (active ? "orbx-g-cyan-1" : "orbx-g-red-1");
+      os.parentElement.classList.toggle("red", !active);
+      os.textContent = active ? "Working" : (state.mgr.enabled ? "Armed" : "Idle");
+    }
   }
 
   var series = [];
@@ -1251,6 +1438,13 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     $("#neurontgl").setAttribute("aria-checked", neuronOn?"true":"false");
     $("#neuroncard").classList.toggle("active", neuronOn);
     $("#neuronstatetxt").textContent = neuronOn ? "Overseeing all bots · promotes on demand" : "Off — no oversight";
+    var nb=$("#orbxNeuron"), ng=$("#orbxNeuronGlow"), ns=$("#orbxNeuronStatus");
+    if (nb){
+      nb.className = "orbx-body " + (neuronOn ? "orbx-b-cyan-1" : "orbx-b-red-1");
+      ng.className = "orbx-glow " + (neuronOn ? "orbx-g-cyan-1" : "orbx-g-red-1");
+      ns.parentElement.classList.toggle("red", !neuronOn);
+      ns.textContent = neuronOn ? "Working" : "Idle";
+    }
   }
   function toggleNeuron(){ neuronOn=!neuronOn; try{ localStorage.setItem("agentdeck.neuron", neuronOn?"1":"0"); }catch(e){} haptic("medium"); renderNeuron(); }
   $("#neurontgl").addEventListener("click", toggleNeuron);
@@ -1259,6 +1453,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   // ---------- micro bots ----------
   function renderMicrobots(list){
     list = list || [];
+    renderOrbitMicro(list);
     var head=$("#microsechead"), grid=$("#microgrid");
     if (!list.length){ head.hidden=true; grid.hidden=true; grid.innerHTML=""; return; }
     head.hidden=false; grid.hidden=false;
@@ -1273,6 +1468,28 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
         (m.flag?'<div class="mflag">⚠ '+esc(m.flag)+'</div>':'')+
         '</div>';
     }).join("");
+  }
+  function renderOrbitMicro(list){
+    var ring=$("#orbxRingMicro"); if(!ring) return; ring.innerHTML="";
+    list.forEach(function(m, i){
+      var pos = orbxPos(i, list.length, 172);
+      var s = m.status || "idle";
+      var problem = (s==="down" || s==="missing" || s==="stale");
+      var tone = problem ? "red-2" : "cyan-3";
+      ring.appendChild(orbxNode(pos.x, pos.y, "210s", "orbx-sz-3", "orbx-g-"+tone, "orbx-b-"+tone, m.name, "", "", function(){ openMicroDetail(m); }));
+    });
+  }
+  function openMicroDetail(m){
+    var s = m.status || "idle";
+    var problem = (s==="down" || s==="missing" || s==="stale");
+    sheet.innerHTML =
+      '<div class="grab"></div>' +
+      '<div class="detail-head"><div class="bigface" style="color:'+(problem?"var(--danger)":"var(--steel)")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>' +
+      '<div><h3>'+esc(m.name)+'</h3><div class="role2">'+(problem?esc(s.toUpperCase())+" — not responding":"Passive · deterministic"+(m.schedule?" · "+esc(m.schedule):""))+'</div></div></div>' +
+      (m.note?'<div class="field"><label>What it does</label><div style="font-size:13px;color:var(--ink-2);line-height:1.5;">'+esc(m.note)+'</div></div>':'') +
+      (m.connects?'<div class="field"><label>Connects to</label><div style="font-family:var(--mono);font-size:12px;color:var(--accent);">→ '+esc(m.connects)+'</div></div>':'') +
+      (m.flag?'<div class="hardstop" style="margin-top:14px;">⚠ '+esc(m.flag)+'</div>':'');
+    scrim.classList.add("show"); document.body.classList.add("orbx-sheet-open");
   }
 
   // ---------- LIVE mode: mirror the real Atom via data.json ----------
@@ -1501,7 +1718,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   }
   document.getElementById("approvals").addEventListener("click", openApprovals);
   async function decideApproval(id, decision, btn){
-    var item = btn.closest(".appitem"); item.style.opacity=".5"; haptic("medium");
+    var item = btn.closest(".appitem"); item.style.opacity=".5"; hapticN(decision==="approve"?"success":"warning");
     var ok = await apiPost("/api/approve", { id:id, decision:decision });
     var body=$("#logbody"), em=$("#logempty"); if(em) em.remove();
     var t=new Date(), ts=pad2(t.getHours())+":"+pad2(t.getMinutes())+":"+pad2(t.getSeconds());
@@ -1532,8 +1749,18 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   function openNeeded(){
     var open = NEEDED.filter(function(x){ return !x.doneAt; });
     if(!open.length) return; haptic("light");
+    // `rank` is set by loop/needed-rank.js, which weighs focus ventures, whether the
+    // venture already produces real output, and what the ask costs Tris. Urgency alone
+    // put "attach a billing card" above a free 5-minute signup for the one venture
+    // that actually works. Fall back to urgency only for items ranking hasn't reached.
     var order={now:0,soon:1,later:2};
-    open.sort(function(a,b){ return (order[a.urgency]!==undefined?order[a.urgency]:3)-(order[b.urgency]!==undefined?order[b.urgency]:3); });
+    var ord=function(x){ return (order[x.urgency]!==undefined?order[x.urgency]:3); };
+    open.sort(function(a,b){
+      if(typeof a.rank==="number" && typeof b.rank==="number") return a.rank-b.rank;
+      if(typeof a.rank==="number") return -1;
+      if(typeof b.rank==="number") return 1;
+      return ord(a)-ord(b);
+    });
     sheet.innerHTML = '<div class="grab"></div><h3>Needed to finish</h3>'+
       '<div class="hint" style="text-align:left;margin:2px 0 10px;">Atom’s to-do list for you — tick an item when it’s done; Atom verifies and clears it.</div>'+
       open.map(function(it){ return '<div class="todoitem" data-id="'+esc(it.id)+'">'+
@@ -1562,7 +1789,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   // ---------- per-agent enable/disable ----------
   async function toggleAgent(id){
     var a = state.agents.filter(function(x){ return x.id===id; })[0]; if (!a) return;
-    var want = !a.enabled; a.enabled = want; haptic("light");
+    var want = !a.enabled; a.enabled = want; haptic(want?"medium":"soft");
     renderAgents(); renderCore();
     toast((a.name||"Agent")+(want?" enabled":" disabled"), want?"good":"info");
     if (LIVE){ var ok = await apiPost("/api/agent", { id:id, enabled:want }); if (ok) setTimeout(loadLive, 1500); }
@@ -1586,7 +1813,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     var ok = await apiPost("/api/command", { text: text });
     btn.removeAttribute("aria-busy"); btn.innerHTML=inner;
     hint.className = "cmdhint sent";
-    if (ok){ hint.textContent = "Sent ✓ — Atom runs it on its next tick."; flashOk(btn); toast("Command sent — Atom runs it next tick", "ok"); setTimeout(loadLive, 1500); }
+    if (ok){ hint.textContent = "Sent ✓ — Atom runs it on its next tick."; flashOk(btn); hapticN("success"); toast("Command sent — Atom runs it next tick", "ok"); setTimeout(loadLive, 1500); }
     else { queueCommand({ type:"atom-command", text:text, at:new Date().toISOString() }, "command");
            hint.textContent = "Queued — no VPS link yet (demo mode)."; toast("Queued — no live link (demo)", "info"); }
   }
@@ -1603,7 +1830,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   async function liveToggleAtom(){
     var want = !state.power;
     if (!want){ var okc = await confirmPause(); if (!okc) return; }  // confirm before pausing
-    haptic("medium");
+    want ? hapticN("success") : haptic("rigid");
     var ok = await apiPost("/api/control", { action: want ? "resume" : "pause" });
     if (ok){ state.power = want; renderCore();
       $("#corestate").textContent = want ? "TAP TO PAUSE" : "TAP TO START";
@@ -1615,7 +1842,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   }
 
   var scrim=$("#scrim"), sheet=$("#sheet");
-  function closeSheet(){ scrim.classList.remove("show"); }
+  function closeSheet(){ scrim.classList.remove("show"); document.body.classList.remove("orbx-sheet-open"); }
   scrim.addEventListener("click", function(e){ if (e.target===scrim) closeSheet(); });
 
   function openAdd(){
@@ -1664,11 +1891,218 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     });
   }
   $("#addtop").addEventListener("click", function(){ haptic("light"); openAdd(); });
+  var addtop2 = $("#addtop2"); if (addtop2) addtop2.addEventListener("click", function(){ haptic("light"); openAdd(); });
+
+  function openCmdDetail(which){
+    if (which==="neuron"){
+      sheet.innerHTML =
+        '<div class="grab"></div>' +
+        '<div class="detail-head"><div class="bigface" style="color:var(--accent)"><span id="neuronrobot2"></span></div>' +
+        '<div><h3>Neuron <span class="mdl opus">Opus</span></h3><div class="role2">'+(neuronOn?"Working · overseeing all bots":"Idle — no oversight")+'</div></div></div>' +
+        '<div class="stats"><div class="stat"><div class="v">'+$("#nwatch").textContent+'</div><div class="k">watching</div></div><div class="stat"><div class="v">'+$("#nchk").textContent+'</div><div class="k">checked</div></div><div class="stat"><div class="v">'+$("#npro").textContent+'</div><div class="k">promoted</div></div></div>' +
+        '<div class="field"><label>What it does</label><div style="font-size:13px;color:var(--ink-2);line-height:1.5;">Head brain of every process — watches all bots, double-checks work, and promotes a struggling bot to a bigger model just for that task, then puts it back.</div></div>' +
+        '<div class="btnrow"><button class="btn wide '+(neuronOn?"":"good")+'" id="cmdtoggle">'+(neuronOn?"Turn off":"Turn on")+'</button></div>';
+      $("#cmdtoggle").addEventListener("click", function(){ toggleNeuron(); openCmdDetail("neuron"); });
+      var r2=$("#neuronrobot2"); if (r2) r2.innerHTML = $("#neuronrobot") ? $("#neuronrobot").innerHTML : "";
+    } else if (which==="overseer"){
+      var active = state.power && state.mgr.enabled;
+      sheet.innerHTML =
+        '<div class="grab"></div>' +
+        '<div class="detail-head"><div class="bigface" style="color:var(--warn)"><span id="ovrobot2"></span></div>' +
+        '<div><h3>Overseer <span class="mdl fable">Fable-5</span></h3><div class="role2">'+(active?"Working · auditing "+SYSTEMS.length+" systems":state.mgr.enabled?"Armed — start the deck to run":"Idle — standby")+'</div></div></div>' +
+        '<div class="stats"><div class="stat"><div class="v">'+state.mgr.audits+'</div><div class="k">swept</div></div><div class="stat"><div class="v">'+state.mgr.fixes+'</div><div class="k">fixed</div></div><div class="stat"><div class="v">'+state.mgr.promos+'</div><div class="k">promoted</div></div></div>' +
+        '<div class="field"><label>What it does</label><div style="font-size:13px;color:var(--ink-2);line-height:1.5;">Audits every system you control and fixes what\'s broken on its own — no prompt. Promotes a worker to a bigger model when it falls behind.</div></div>' +
+        '<div class="btnrow"><button class="btn wide '+(state.mgr.enabled?"":"good")+'" id="cmdtoggle">'+(state.mgr.enabled?"Turn off":"Turn on")+'</button></div>';
+      $("#cmdtoggle").addEventListener("click", function(){ toggleOverseer(); openCmdDetail("overseer"); });
+      var r3=$("#ovrobot2"); if (r3) r3.innerHTML = $("#ovrobot") ? $("#ovrobot").innerHTML : "";
+    } else if (which==="capmkt"){
+      sheet.innerHTML =
+        '<div class="grab"></div>' +
+        '<div class="detail-head"><div class="bigface" style="color:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M12 3 9 9l3 12 3-12z"/></svg></div>' +
+        '<div><h3>Capital Markets</h3><div class="role2">CFO · Treasury — needs your attention</div></div></div>' +
+        '<div class="stats"><div class="stat"><div class="v">3</div><div class="k">streams</div></div><div class="stat"><div class="v">£0</div><div class="k">deployed</div></div><div class="stat"><div class="v" style="font-size:13px">PAPER</div><div class="k">mode</div></div></div>' +
+        '<div class="field"><label>What it does</label><div style="font-size:13px;color:var(--ink-2);line-height:1.5;">Governs the money — the copy-trading treasury. Empire income DCAs in &amp; compounds. Memecoin · stocks · forex, paper-first.</div></div>' +
+        '<div class="hardstop" style="margin-top:14px;">Hard stop — needs your verify + deposit to go live</div>';
+    } else if (which==="nucleus"){
+      sheet.innerHTML =
+        '<div class="grab"></div>' +
+        '<div class="detail-head"><div class="bigface" style="color:var(--accent-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/></svg></div>' +
+        '<div><h3>Obsidian Nucleus</h3><div class="role2">Live · memory core</div></div></div>' +
+        '<div class="field"><label>What it does</label><div style="font-size:13px;color:var(--ink-2);line-height:1.5;">The memory backbone — every agent reads and writes through this vault. Two-way sync keeps the VPS, laptop and GitHub copies identical.</div></div>';
+    }
+    scrim.classList.add("show"); document.body.classList.add("orbx-sheet-open");
+  }
+  ["orbxNeuron","orbxOverseer","orbxCapMkt","orbxNucleus"].forEach(function(id){
+    var el=$("#"+id); if(!el) return;
+    var which = id==="orbxNeuron"?"neuron":id==="orbxOverseer"?"overseer":id==="orbxCapMkt"?"capmkt":"nucleus";
+    el.addEventListener("click", function(){ haptic("light"); openCmdDetail(which); });
+  });
 
   function fmt(n){ return (n||0).toLocaleString("en-GB"); }
   function cap(s){ s=String(s); return s.charAt(0).toUpperCase()+s.slice(1); }
   function pad2(n){ return n<10?"0"+n:""+n; }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  // ---------- System control (crons, services, maintenance, spend, backlog) ----------
+  // Everything here used to require SSH. A frozen cron, a dead service and the token
+  // burn rate were all invisible from the phone, which is where they actually get
+  // noticed. Reads are free; writes are narrow (an id plus an enum) and destructive
+  // ones confirm first.
+  var SYS = null, SPEND = null;
+
+  function confirmAction(msg, cb){
+    if (TG && TG.showConfirm) { try { return TG.showConfirm(msg, function(ok){ if(ok) cb(); }); } catch(e){} }
+    if (window.confirm(msg)) cb();
+  }
+  async function sysPost(path, body){
+    try {
+      var r = await fetch(path, { method:"POST", cache:"no-store",
+        headers: Object.assign({ "content-type":"application/json" }, tgHeaders()),
+        body: JSON.stringify(body) });
+      return await r.json();
+    } catch(e){ return { ok:false, error:String(e) }; }
+  }
+  async function loadSystem(){
+    try {
+      var r = await fetch("system.json", { cache:"no-store", headers: tgHeaders() });
+      if(!r.ok) return null;
+      SYS = await r.json();
+      var down = SYS.services.filter(function(s){ return !s.up; }).length;
+      var off  = SYS.crons.filter(function(c){ return !c.enabled; }).length;
+      $("#systemsub").textContent =
+        SYS.crons.length + " jobs" + (off?" · "+off+" off":"") + (down?" · "+down+" DOWN":" · all up");
+      return SYS;
+    } catch(e){ return null; }
+  }
+
+  function ageTxt(h){
+    if (h === null || h === undefined) return "";
+    if (h < 1) return Math.round(h*60) + "m ago";
+    if (h < 48) return h.toFixed(1) + "h ago";
+    return Math.round(h/24) + "d ago";
+  }
+
+  function sysSection(title, inner){
+    return '<div style="margin:14px 0 6px;font-weight:600;opacity:.85;">'+esc(title)+'</div>'+inner;
+  }
+
+  function renderSystem(){
+    if(!SYS){ sheet.innerHTML='<div class="grab"></div><h3>System control</h3><div class="hint">Could not load — is the VPS reachable?</div>'; return; }
+
+    var spendHtml = SPEND
+      ? '<div class="hint" style="text-align:left;">Worker model: <b>'+esc(SPEND.workerModel||"?")+'</b>'
+        + (SPEND.today ? ' · today <b>'+SPEND.today.calls+'</b> calls' : '')
+        + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">'
+        + SPEND.days.slice(0,7).map(function(d){
+            return '<span class="todoven" style="padding:3px 7px;">'+esc(d.day.slice(5))+': '+d.calls+'</span>'; }).join('')
+        + '</div><div style="margin-top:8px;">'
+        + SPEND.workerModelOptions.map(function(m){
+            var on = m===SPEND.workerModel;
+            return '<button class="sysbtn" data-model="'+esc(m)+'" style="opacity:'+(on?1:.6)+'">'+(on?"● ":"")+esc(m.replace("claude-","").replace(/-\d{8}$/,""))+'</button>'; }).join(' ')
+        + '</div>'
+      : '<div class="hint">Tap to load token usage…<button class="sysbtn" id="loadspend">Load spend</button></div>';
+
+    var crons = SYS.crons.map(function(c){
+      return '<div class="todoitem" style="align-items:flex-start;">'
+        + '<div class="todomid" style="flex:1;">'
+        + '<div><b>'+esc(c.label)+'</b> <span class="todoven">'+esc(c.schedule)+'</span></div>'
+        + '<div class="hint" style="text-align:left;margin:2px 0 0;">'+esc(ageTxt(c.lastRunHoursAgo))
+        + (c.disabledNote ? ' · <i>'+esc(c.disabledNote)+'</i>' : '')+'</div></div>'
+        + '<button class="sysbtn" data-cron="'+esc(c.id)+'" data-enable="'+(c.enabled?"0":"1")+'">'
+        + (c.enabled?"ON":"OFF")+'</button></div>';
+    }).join('');
+
+    var svcs = SYS.services.map(function(s){
+      return '<div class="todoitem"><div class="todomid" style="flex:1;"><b>'+esc(s.label)+'</b> '
+        + '<span class="todoven">'+(s.up?"up":"DOWN")+'</span></div>'
+        + (s.canRestart?'<button class="sysbtn" data-svc="'+esc(s.id)+'" data-act="restart">Restart</button>':'')
+        + (s.canStop?' <button class="sysbtn" data-svc="'+esc(s.id)+'" data-act="stop">Stop</button>':'')
+        + '</div>';
+    }).join('');
+
+    var maint = SYS.maintenance.map(function(m){
+      return '<button class="sysbtn" data-maint="'+esc(m.id)+'">'+esc(m.label)+'</button>'; }).join(' ');
+
+    var back = SYS.backlog.map(function(t){
+      return '<div class="todoitem" style="align-items:flex-start;"><div class="todomid" style="flex:1;">'
+        + '<div><b>#'+esc(t.id)+'</b> '+esc(String(t.title||"").slice(0,70))+'</div>'
+        + '<div class="hint" style="text-align:left;margin:2px 0 0;">'+esc(t.status)+' · '+esc(t.venture||"-")+'</div></div>'
+        + ["todo","doing","parked"].map(function(s){
+            return '<button class="sysbtn" data-task="'+esc(t.id)+'" data-status="'+s+'" style="opacity:'+(t.status===s?1:.55)+'">'+s+'</button>'; }).join('')
+        + '</div>';
+    }).join('') || '<div class="hint">No live tasks.</div>';
+
+    sheet.innerHTML = '<div class="grab"></div><h3>System control</h3>'
+      + '<div class="hint" style="text-align:left;margin:2px 0 8px;">Everything here is deterministic and costs no Claude tokens. Turning a job or service off asks first.</div>'
+      + sysSection("Token spend", spendHtml)
+      + sysSection("Scheduled jobs ("+SYS.crons.length+")", crons)
+      + sysSection("Services", svcs)
+      + sysSection("Run maintenance now", '<div style="display:flex;gap:6px;flex-wrap:wrap;">'+maint+'</div><div id="maintout" class="hint" style="text-align:left;white-space:pre-wrap;"></div>')
+      + sysSection("Backlog", back);
+  }
+
+  async function openSystem(){
+    haptic("light");
+    sheet.innerHTML='<div class="grab"></div><h3>System control</h3><div class="hint">Loading…</div>';
+    scrim.classList.add("show"); document.body.classList.add("orbx-sheet-open");
+    await loadSystem(); renderSystem();
+  }
+
+  sheet.addEventListener("click", async function(e){
+    var b = e.target.closest ? e.target.closest("button") : null;
+    if(!b) return;
+
+    if (b.id === "loadspend"){
+      b.textContent="Loading…";
+      try { var r = await fetch("spend.json", { cache:"no-store", headers: tgHeaders() }); SPEND = await r.json(); } catch(err){}
+      return renderSystem();
+    }
+    if (b.dataset.model){
+      var m=b.dataset.model;
+      return confirmAction("Set the Atom worker model to "+m+"?\n\nThis changes the cost of every 15-minute tick.", async function(){
+        var r = await sysPost("api/worker-model", { model:m });
+        if(r.ok){ SPEND.workerModel = r.workerModel; hapticN("success"); } else hapticN("error");
+        renderSystem();
+      });
+    }
+    if (b.dataset.cron){
+      var id=b.dataset.cron, enable=b.dataset.enable==="1";
+      var job=SYS.crons.filter(function(c){return c.id===id;})[0]||{};
+      var msg = enable
+        ? "Turn ON the scheduled job \""+job.label+"\"?"+(job.disabledNote?"\n\nIt was switched off deliberately:\n"+job.disabledNote:"")
+        : "Turn OFF the scheduled job \""+job.label+"\"? It will stop running until you switch it back on.";
+      return confirmAction(msg, async function(){
+        var r = await sysPost("api/cron", { id:id, enable:enable });
+        hapticN(r.ok?"success":"error");
+        await loadSystem(); renderSystem();
+      });
+    }
+    if (b.dataset.svc){
+      var sid=b.dataset.svc, act=b.dataset.act;
+      return confirmAction((act==="stop"?"Stop":"Restart")+" "+sid+"?", async function(){
+        b.textContent="…";
+        var r = await sysPost("api/service", { id:sid, action:act });
+        hapticN(r.ok?"success":"error");
+        await loadSystem(); renderSystem();
+      });
+    }
+    if (b.dataset.maint){
+      b.textContent="Running…"; b.disabled=true;
+      var r = await sysPost("api/maintenance", { id:b.dataset.maint });
+      hapticN(r.ok?"success":"error");
+      renderSystem();
+      var out=$("#maintout"); if(out) out.textContent = (r.output||r.error||"done").slice(-1200);
+      return;
+    }
+    if (b.dataset.task){
+      var tid=b.dataset.task, st=b.dataset.status;
+      var r = await sysPost("api/backlog", { id:tid, status:st });
+      hapticN(r.ok?"success":"error");
+      await loadSystem(); renderSystem();
+    }
+  });
+
+  var _sysbtn=$("#systembtn"); if(_sysbtn) _sysbtn.addEventListener("click", openSystem);
 
   // ---------- pages / businesses ----------
   var BIZ = null;
@@ -1705,7 +2139,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     }, {passive:true});
   })();
   document.querySelectorAll(".navbtn").forEach(function(b){
-    b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); haptic("light"); showView(v); if(v==="biz") loadBusinesses(); if(v==="out") loadOutsourced(); });
+    b.addEventListener("click", function(){ var v=b.getAttribute("data-view"); hapticSel(); showView(v); if(v==="biz") loadBusinesses(); if(v==="out") loadOutsourced(); });
   });
   $("#bizback").addEventListener("click", function(){ haptic("light"); showView("biz"); });
 
@@ -1751,7 +2185,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
       '<div class="ob"><div class="ov tabnum">'+fmt(d.today.ok)+'</div><div class="ok2">calls ok</div></div>'+
       '<div class="ob"><div class="ov tabnum">'+d.providersOnline+'<span style="color:var(--ink-mut);font-size:15px">/'+d.providersTotal+'</span></div><div class="ok2">providers</div></div>';
     // graph
-    $("#otok").textContent=fmt((d.series||[]).reduce(function(a,s){return a+s.tokens;},0));
+    animateCount($("#otok"), (d.series||[]).reduce(function(a,s){return a+s.tokens;},0));
     var lastH=(d.series&&d.series.length)?d.series[d.series.length-1].tokens:0;
     var rate=$("#orate"); if(lastH>0){ rate.className="rate tabnum"; rate.textContent="▲ "+fmt(lastH)+" / h"; } else { rate.className="rate idle tabnum"; rate.textContent="— idle"; }
     outGraph(d.series||[]);
@@ -1801,7 +2235,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
     if(!list.length){ el.innerHTML=''; return; }
     var live=list.filter(function(b){return b.stage==='live';}).length;
     var building=list.filter(function(b){return b.stage==='building';}).length;
-    var avg=Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length);
+    var avg=Math.round(list.reduce(function(a,b){return a+(Number(b.progress)||0);},0)/list.length);
     var totRec=list.reduce(function(a,b){return a+parseMoney(b.incomeRecent);},0);
     var earning=totRec>0;
     var big=earning?(money(totRec)+'<span class="gsu">/mo</span>'):(avg+'<span class="gsu">% built</span>');
@@ -1820,7 +2254,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   function renderBizList(){
     var box=$("#bizlist"), list=(BIZ&&BIZ.businesses)||[];
     var live=list.filter(function(b){return b.stage==="live";}).length;
-    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length):0;
+    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(Number(b.progress)||0);},0)/list.length):0;
     var totRec=list.reduce(function(a,b){return a+parseMoney(b.incomeRecent);},0);
     var totPot=list.reduce(function(a,b){return a+parseMoney(b.incomePotential);},0);
     var building=list.filter(function(b){return b.stage==="building";}).length;
@@ -1915,7 +2349,7 @@ button:disabled, button[aria-busy="true"] { opacity: .7; cursor: default; }
   function openUmbrella(){
     var d=$("#bizdetail"), list=(BIZ.businesses||[]);
     var byStage={live:0,building:0,idea:0}; list.forEach(function(b){ byStage[b.stage]=(byStage[b.stage]||0)+1; });
-    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(b.progress||0);},0)/list.length):0;
+    var avg=list.length?Math.round(list.reduce(function(a,b){return a+(Number(b.progress)||0);},0)/list.length):0;
     d.innerHTML=
       '<div class="dtitle">'+esc(BIZ.umbrella.name)+'</div><div class="dgroup">Umbrella overview</div>'+
       '<div class="dsum">'+esc(BIZ.umbrella.note||BIZ.umbrella.tagline||"")+'</div>'+
